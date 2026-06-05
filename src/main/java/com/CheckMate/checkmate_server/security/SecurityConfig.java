@@ -1,4 +1,4 @@
-package com.CheckMate.checkmate_server.security.service;
+package com.CheckMate.checkmate_server.security;
 
 import com.CheckMate.checkmate_server.security.jwt.JWTFilter;
 import com.CheckMate.checkmate_server.security.jwt.JWTUtil;
@@ -49,7 +49,7 @@ public class SecurityConfig {
         //경로별 인가
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/member/sign-up", "/", "/login","/h2-console/**",
+                        .requestMatchers("/user/sign-up", "/", "/login","/h2-console/**",
                                 "/swagger-ui/**", "/v3/api-docs/**").permitAll() //모두 허용
                         .requestMatchers("/admin/**").hasRole("ADMIN") //admin 만
                         .anyRequest().authenticated()); //인증된 사용자만

@@ -1,7 +1,7 @@
 package com.CheckMate.checkmate_server.security.jwt;
 
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
-import com.CheckMate.checkmate_server.security.dto.MemberDto;
+import com.CheckMate.checkmate_server.security.dto.UserDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,10 +49,10 @@ public class JWTFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
 
-        MemberDto member = new MemberDto(username, "temp_pw", role);
+        UserDto user = new UserDto(username, "temp_pw", role);
 
         //UserDetails에 정보 담기
-        CustomUserDetails customUserDetails = new CustomUserDetails(member);
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
 
         //인증 토큰 생성
         Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
