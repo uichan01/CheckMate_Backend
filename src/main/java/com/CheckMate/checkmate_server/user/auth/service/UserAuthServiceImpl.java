@@ -1,10 +1,10 @@
-package com.CheckMate.checkmate_server.user.service;
+package com.CheckMate.checkmate_server.user.auth.service;
 
 import com.CheckMate.checkmate_server.security.jwt.JWTUtil;
 import com.CheckMate.checkmate_server.user.domain.UserEntity;
 import com.CheckMate.checkmate_server.user.domain.UserRole;
-import com.CheckMate.checkmate_server.user.dto.req.SignUpRequestDto;
-import com.CheckMate.checkmate_server.user.dto.res.SignUpResponseDto;
+import com.CheckMate.checkmate_server.user.auth.dto.req.SignUpRequestDto;
+import com.CheckMate.checkmate_server.user.auth.dto.res.SignUpResponseDto;
 import com.CheckMate.checkmate_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserAuthServiceImpl implements UserAuthService {
 
     private static final Long TOKEN_EXPIRE_MS = 60 * 60 * 1000L;
 
@@ -54,5 +54,19 @@ public class UserService {
                 .role(savedUser.getRole().name())
                 .token(token)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        userRepository.delete(user);
+    }
+
+    @Override
+    public boolean checkEmailDuplication(String email) {
+        return userRepository.findByEmail(email).isPresent();
     }
 }

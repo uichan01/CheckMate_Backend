@@ -1,4 +1,4 @@
-package com.CheckMate.checkmate_server.user.dto.req;
+package com.CheckMate.checkmate_server.user.auth.dto.req;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
