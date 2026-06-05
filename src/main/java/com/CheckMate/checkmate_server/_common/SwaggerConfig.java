@@ -17,8 +17,8 @@ public class SwaggerConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("Shop API")
-                        .description("e-commerce 쇼핑몰 API 문서")
+                        .title("CheckMate API")
+                        .description("CheckMate API 문서")
                         .version("v1.0"))
                 .addSecurityItem(new SecurityRequirement().addList(jwtScheme))
                 .components(new Components()
