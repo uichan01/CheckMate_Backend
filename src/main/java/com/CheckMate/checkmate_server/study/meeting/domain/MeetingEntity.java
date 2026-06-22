@@ -26,7 +26,7 @@ public class MeetingEntity {
     private StudyGroupEntity studyGroupEntity;
 
     @ManyToOne
-    @JoinColumn(name = "study_id")
+    @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 
     @Column(name = "title", length = 20)

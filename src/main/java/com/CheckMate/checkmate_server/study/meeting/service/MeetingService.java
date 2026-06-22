@@ -19,6 +19,8 @@ public interface MeetingService {
     public List<MeetingListResponseDto> getMeetingList(long studyId, String username);
     //미팅 상세 조회
     public MeetingDetailResponseDto getMeetingDetail(long meetingId, String username);
+    //미팅 참석
+    public void participateMeeting(long meetingId, String username);
     //미팅 출석
     public void attendanceMeeting(long meetingId, String username);
 }
