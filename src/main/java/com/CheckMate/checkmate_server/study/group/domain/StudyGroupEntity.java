@@ -14,6 +14,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudyGroupEntity {
+    public StudyGroupEntity(Long categoryId, String title, String description, GroupScope scope, GroupJoinPolicy joinPolicy) {
+        this.categoryId = categoryId;
+        this.title = title;
+        this.description = description;
+        this.scope = scope;
+        this.joinPolicy = joinPolicy;
+    }
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="group_id")
@@ -39,4 +46,20 @@ public class StudyGroupEntity {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public static StudyGroupEntity create(
+            Long categoryId,
+            String title,
+            String description,
+            GroupScope scope,
+            GroupJoinPolicy joinPolicy
+    ) {
+        return new StudyGroupEntity(
+                categoryId,
+                title,
+                description,
+                scope,
+                joinPolicy
+        );
+    }
 }
