@@ -6,10 +6,12 @@ import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@Builder
 public class StudyGroupResponseDto {
     private Long studyId;
     private String categoryName;
