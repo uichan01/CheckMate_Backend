@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudyMemberRepository extends JpaRepository<StudyMemberEntity, Long> {
-    Optional<StudyMemberEntity> findByStudy_StudyIdAndUser_Email(Long studyId, String email);
-    Optional<StudyMemberEntity> findByStudyGroupEntity_GroupIdAndUserEntity_Email(
-            Long groupId,
+    Optional<StudyMemberEntity> findByStudyGroupEntity_StudyIdAndUserEntity_Email(
+            Long studyId,
             String email
     );
 }

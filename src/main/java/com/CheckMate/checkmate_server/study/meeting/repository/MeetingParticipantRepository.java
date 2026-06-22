@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface MeetingParticipantRepository extends JpaRepository<MeetingParticipantEntity, Long> {
-    public void deleteByMeetingEntity_MeetingId(Long meetingId);
+    void deleteByMeetingEntity_MeetingId(Long meetingId);
     List<MeetingParticipantEntity> findByMeetingEntity_MeetingId(Long meetingId);
     boolean existsByMeetingEntity_MeetingIdAndUserEntity_Email(Long meetingId, String email);
     Optional<MeetingParticipantEntity> findByMeetingEntity_MeetingIdAndUserEntity_Email(

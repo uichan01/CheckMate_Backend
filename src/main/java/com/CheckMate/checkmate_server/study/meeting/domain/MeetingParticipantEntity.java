@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class MeetingParticipantEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "meeting_id")
+    @Column(name = "meeting_participant_id")
     private Long meetingParticipantId;
 
     @ManyToOne

@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MeetingRepository extends JpaRepository<MeetingEntity, Long> {
-    List<MeetingEntity> findByStudy_StudyId(Long studyId);
+    List<MeetingEntity> findByStudyGroupEntity_StudyId(Long studyId);
 }

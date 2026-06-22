@@ -73,7 +73,7 @@ public class MeetingController {
     @PostMapping("/participate/{meeting_id}")
     public ResponseEntity<ApiResponse<Void>> participateMeeting(@RequestParam("meeting_id") long meetingId,
                                                                 @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        meetingService.attendanceMeeting(meetingId, customUserDetails.getUsername());
+        meetingService.participateMeeting(meetingId, customUserDetails.getUsername());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success());
