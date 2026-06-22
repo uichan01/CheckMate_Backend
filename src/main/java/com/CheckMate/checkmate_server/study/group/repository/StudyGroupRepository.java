@@ -1,0 +1,17 @@
+package com.CheckMate.checkmate_server.study.group.repository;
+
+import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface StudyGroupRepository extends JpaRepository<StudyGroupEntity, Long> {
+    List<StudyGroupEntity> findByTitleContaining(String keyword);
+
+    List<StudyGroupEntity> findByCategoryEntity_CategoryId(Long categoryId);
+
+    List<StudyGroupEntity> findByTitleContainingAndCategoryEntity_CategoryId(
+            String keyword,
+            Long categoryId
+    );
+}
