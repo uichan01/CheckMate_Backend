@@ -1,5 +1,6 @@
 package com.CheckMate.checkmate_server.study.group.domain;
 
+import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,8 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudyGroupEntity {
-    public StudyGroupEntity(Long categoryId, String title, String description, GroupScope scope, GroupJoinPolicy joinPolicy) {
-        this.categoryId = categoryId;
+    public StudyGroupEntity(StudyCategoryEntity categoryEntity, String title, String description, GroupScope scope, GroupJoinPolicy joinPolicy) {
+        this.categoryEntity = categoryEntity;
         this.title = title;
         this.description = description;
         this.scope = scope;
@@ -23,11 +24,15 @@ public class StudyGroupEntity {
     }
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="group_id")
-    private Long groupId;
+    @Column(name="study_id")
+    private Long studyId;
 
-    @Column(name="category_id", nullable = false)
-    private Long categoryId;
+//    @Column(name="category_id", nullable = false)
+//    private Long categoryId;
+
+    @ManyToOne
+    @JoinColumn(name ="category_id")
+    private StudyCategoryEntity categoryEntity;
 
     @Column(name="title", length = 50, nullable = false)
     private String title;
@@ -48,14 +53,14 @@ public class StudyGroupEntity {
     private LocalDateTime createdAt;
 
     public static StudyGroupEntity create(
-            Long categoryId,
+            StudyCategoryEntity categoryEntity,
             String title,
             String description,
             GroupScope scope,
             GroupJoinPolicy joinPolicy
     ) {
         return new StudyGroupEntity(
-                categoryId,
+                categoryEntity,
                 title,
                 description,
                 scope,
