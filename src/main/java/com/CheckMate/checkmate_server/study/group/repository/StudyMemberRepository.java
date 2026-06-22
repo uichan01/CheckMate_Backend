@@ -1,6 +1,7 @@
 package com.CheckMate.checkmate_server.study.group.repository;
 
 import com.CheckMate.checkmate_server.study.group.domain.StudyMemberEntity;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,4 +12,5 @@ public interface StudyMemberRepository extends JpaRepository<StudyMemberEntity, 
             Long studyId,
             String email
     );
+    List<StudyMemberEntity> findByUserEntity_UserIdAndStatus(Long userId, StudyMemberStatus status);
 }
