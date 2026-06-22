@@ -16,6 +16,7 @@ import com.CheckMate.checkmate_server.study.group.repository.StudyGroupRepositor
 import com.CheckMate.checkmate_server.study.group.repository.StudyMemberRepository;
 import com.CheckMate.checkmate_server.user.domain.UserEntity;
 import com.CheckMate.checkmate_server.user.repository.UserRepository;
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,6 +43,9 @@ public class StudyGroupService {
         // 해당 엔티티가 없으면 예외 throw
         StudyCategoryEntity categoryEntity = studyCategoryEntity
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+
+        // 자신의 이메일을 기반으로 userEntity를 찾고, 없으면 예외 throw
+        UserEntity userEntity = userRepository.findByEmail(myEmail).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
         
         // 스터디 그룹 엔티티 생성
         StudyGroupEntity entity = StudyGroupEntity.builder()
@@ -53,8 +57,6 @@ public class StudyGroupService {
                 .build();
         // 생성
         StudyGroupEntity savedEntity = studyGroupRepository.save(entity);
-        // 자신의 이메일을 기반으로 userEntity를 찾고, 없으면 예외 throw
-        UserEntity userEntity = userRepository.findByEmail(myEmail).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
         // 자신을 스터디 장으로 임명
         StudyMemberEntity memberEntity = StudyMemberEntity.builder()
                 .studyGroupEntity(savedEntity)
@@ -117,6 +119,32 @@ public class StudyGroupService {
                         .build()
         ).toList();
         return StudyGroupDetailResponseDto.from(studyGroupEntity, studyMembers);
+    }
+
+    // 스터디 수정
+    @Transactional
+    public Long updateStudyGroup(Long studyId, @NonNull StudyGroupRequestDto request, String myEmail) {
+        // 카테고리id를 받아서 엔티티 획득
+        Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
+
+        // 해당 엔티티가 없으면 예외 throw
+        StudyCategoryEntity categoryEntity = studyCategoryEntity
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+
+        // 자신의 이메일을 기반으로 userEntity를 찾고, 없으면 예외 throw
+        UserEntity userEntity = userRepository.findByEmail(myEmail).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+
+        // studyId에 맞는 스터디 그룹을 찾고, 없으면 예외 Throw
+        StudyGroupEntity entity = studyGroupRepository.findById(studyId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 스터디 그룹입니다."));
+
+        // 수정
+        entity.
+        StudyGroupEntity savedEntity = studyGroupRepository.save(entity);
+
+
+
+        // 스터디id 반환
+        return savedEntity.getStudyId();
     }
 
 

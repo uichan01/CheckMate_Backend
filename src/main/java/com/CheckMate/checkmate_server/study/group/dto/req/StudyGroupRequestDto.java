@@ -3,6 +3,7 @@ package com.CheckMate.checkmate_server.study.group.dto.req;
 import com.CheckMate.checkmate_server.study.group.domain.GroupJoinPolicy;
 import com.CheckMate.checkmate_server.study.group.domain.GroupScope;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class StudyGroupRequestDto {
-    @NotBlank(message = "카테고리는 필수입니다.")
+    @NotNull(message = "카테고리는 필수입니다.")
     private Long categoryId;
 
     @NotBlank(message = "제목은 필수입니다.")
