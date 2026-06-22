@@ -41,11 +41,11 @@ public class StudyGroupEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="scope", length = 20, nullable = false)
+    @Column(name="scope", nullable = false)
     private GroupScope scope;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "join_policy", length = 20, nullable = false)
+    @Column(name = "join_policy", nullable = false)
     private GroupJoinPolicy joinPolicy;
 
     @CreationTimestamp

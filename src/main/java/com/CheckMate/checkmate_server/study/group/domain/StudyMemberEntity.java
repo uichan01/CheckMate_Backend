@@ -35,11 +35,11 @@ public class StudyMemberEntity {
     private UserEntity userEntity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", length = 20, nullable = false)
+    @Column(name = "role", nullable = false)
     private StudyMemberRole role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(name = "status", nullable = false)
     private StudyMemberStatus status;
 
     @CreationTimestamp
