@@ -28,7 +28,7 @@ public class StudyGroupController {
         return ResponseEntity.ok(ApiResponse.success(studyGroupId));
     }
 
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<StudyGroupResponseDto>>> searchStudyGroups(@ModelAttribute StudyGroupSearchRequest request) {
         List<StudyGroupResponseDto> response = groupService.searchStudyGroups(request);
         return ResponseEntity.ok(ApiResponse.success(response));
