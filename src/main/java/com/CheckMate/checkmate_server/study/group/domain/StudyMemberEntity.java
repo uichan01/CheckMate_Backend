@@ -3,6 +3,7 @@ package com.CheckMate.checkmate_server.study.group.domain;
 import com.CheckMate.checkmate_server.user.domain.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class StudyMemberEntity {
     public StudyMemberEntity(StudyGroupEntity studyGroupEntity, UserEntity userEntity, StudyMemberRole role, StudyMemberStatus status) {
         this.studyGroupEntity = studyGroupEntity;
@@ -45,18 +47,4 @@ public class StudyMemberEntity {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    public static StudyMemberEntity create(
-            StudyGroupEntity studyGroupEntity,
-            UserEntity userEntity,
-            StudyMemberRole role,
-            StudyMemberStatus status
-    ) {
-        return new StudyMemberEntity(
-                studyGroupEntity,
-                userEntity,
-                role,
-                status
-        );
-    }
 }
