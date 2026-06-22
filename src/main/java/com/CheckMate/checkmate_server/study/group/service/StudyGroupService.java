@@ -1,14 +1,19 @@
 package com.CheckMate.checkmate_server.study.group.service;
 
+import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
 import com.CheckMate.checkmate_server.study.category.service.StudyCategoryService;
 import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberEntity;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberStatus;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupResponseDto;
 import com.CheckMate.checkmate_server.study.group.repository.StudyGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +26,7 @@ public class StudyGroupService {
     private final StudyCategoryService studyCategoryService;
 
     // 스터디 그룹 생성
-    public Long createStudyGroup(@NonNull StudyGroupRequestDto request) {
+    public Long createStudyGroup(@NonNull StudyGroupRequestDto request, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         // 카테고리id를 받아서 엔티티 획득
         Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
         // 해당 엔티티가 없으면 예외 throw
@@ -37,6 +42,15 @@ public class StudyGroupService {
         );
         // 생성
         StudyGroupEntity savedEntity = studyGroupRepository.save(entity);
+        // 자신을 스터디 장으로 임명
+        StudyMemberEntity memberEntity = StudyMemberEntity.create(
+                savedEntity,
+
+                ,
+                StudyMemberRole.ROLE_OWNER,
+                StudyMemberStatus.STATUS_ACTIVE
+        );
+
         // 스터디id 반환
         return savedEntity.getStudyId();
     }
