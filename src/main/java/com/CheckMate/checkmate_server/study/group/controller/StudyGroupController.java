@@ -4,6 +4,7 @@ import com.CheckMate.checkmate_server.response.ApiResponse;
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
+import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupResponseDto;
 import com.CheckMate.checkmate_server.study.group.service.StudyGroupService;
 import com.CheckMate.checkmate_server.user.dto.res.SignUpResponseDto;
@@ -37,6 +38,13 @@ public class StudyGroupController {
     public ResponseEntity<ApiResponse<List<StudyGroupResponseDto>>> searchStudyGroups(@ModelAttribute StudyGroupSearchRequest request) {
         List<StudyGroupResponseDto> response = groupService.searchStudyGroups(request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // 스터디 그룹 상세 조회
+    @GetMapping("/group/{study_id}")
+    public ResponseEntity<ApiResponse<StudyGroupDetailResponseDto>> getStudyGroupDetails(@PathVariable long studyId) {
+        StudyGroupDetailResponseDto responseDto = groupService.
+        return null;
     }
 
 }

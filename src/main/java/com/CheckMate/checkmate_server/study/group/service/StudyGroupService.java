@@ -9,6 +9,7 @@ import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
 import com.CheckMate.checkmate_server.study.group.domain.StudyMemberStatus;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
+import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupResponseDto;
 import com.CheckMate.checkmate_server.study.group.repository.StudyGroupRepository;
 import com.CheckMate.checkmate_server.study.group.repository.StudyMemberRepository;
@@ -66,7 +67,7 @@ public class StudyGroupService {
         return savedEntity.getStudyId();
     }
 
-    // 조건에 맞게 목록 조회
+    // 스터디 그룹을 조건에 맞게 목록 조회
     public List<StudyGroupResponseDto> searchStudyGroups(StudyGroupSearchRequest request) {
         // 키워드와 카테고리 id 획득
         String keyword = request.getKeyword();
@@ -94,5 +95,14 @@ public class StudyGroupService {
         return studyGroups.stream()
                 .map(StudyGroupResponseDto::from)
                 .toList();
+    }
+    
+    // 스터디 그룹의 상세 조회
+    public StudyGroupDetailResponseDto getStudyGroupDetails(Long studyId) {
+        StudyGroupEntity studyGroupEntity = studyGroupRepository.findById(studyId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 스터디 그룹은 존재하지 않습니다."));
+
+        
+        return null;
     }
 }
