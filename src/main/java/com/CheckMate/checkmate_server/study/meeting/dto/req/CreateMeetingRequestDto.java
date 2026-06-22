@@ -11,16 +11,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CreateMeetingRequestDto {
 
-    long studyId;
-    
-    LocalDateTime meetingTime;
+    private long studyId;
+
+    private LocalDateTime meetingTime;
 
     @Size(max = 50, message = "스터디 제목은 20자 이하여야 합니다.")
-    String title;
+    private String title;
 
     @NotBlank(message = "content는 필수 필드입니다.")
-    String content;
+    private String content;
 
     @Size(max = 50, message = "장소는 50자 이하여야 합니다.")
-    String meetingPlace;
+    private String meetingPlace;
 }
