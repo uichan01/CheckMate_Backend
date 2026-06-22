@@ -3,7 +3,6 @@ package com.CheckMate.checkmate_server.study.meeting.controller;
 import com.CheckMate.checkmate_server.response.ApiResponse;
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import com.CheckMate.checkmate_server.study.meeting.dto.req.CreateMeetingRequestDto;
-import com.CheckMate.checkmate_server.study.meeting.dto.req.DeleteMeetingRequestDto;
 import com.CheckMate.checkmate_server.study.meeting.dto.req.UpdateMeetingRequestDto;
 import com.CheckMate.checkmate_server.study.meeting.dto.res.MeetingDetailResponseDto;
 import com.CheckMate.checkmate_server.study.meeting.dto.res.MeetingListResponseDto;
@@ -42,9 +41,9 @@ public class MeetingController {
                 .body(ApiResponse.success(meetingId));
     }
     //미팅 삭제
-    public ResponseEntity<ApiResponse<Long>> deleteMeeting(@Valid @RequestBody DeleteMeetingRequestDto deleteMeetingRequestDto,
+    public ResponseEntity<ApiResponse<Long>> deleteMeeting(@RequestParam long meetingId,
                                                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        long meetingId = meetingService.deleteMeeting(deleteMeetingRequestDto, customUserDetails.getUsername());
+        meetingService.deleteMeeting(meetingId, customUserDetails.getUsername());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingId));

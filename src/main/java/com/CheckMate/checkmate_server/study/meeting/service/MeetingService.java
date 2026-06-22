@@ -1,14 +1,10 @@
 package com.CheckMate.checkmate_server.study.meeting.service;
 
-import com.CheckMate.checkmate_server.response.ApiResponse;
 import com.CheckMate.checkmate_server.study.meeting.dto.req.CreateMeetingRequestDto;
-import com.CheckMate.checkmate_server.study.meeting.dto.req.DeleteMeetingRequestDto;
 import com.CheckMate.checkmate_server.study.meeting.dto.req.UpdateMeetingRequestDto;
 import com.CheckMate.checkmate_server.study.meeting.dto.res.MeetingDetailResponseDto;
 import com.CheckMate.checkmate_server.study.meeting.dto.res.MeetingListResponseDto;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
+
 
 import java.util.List;
 
@@ -18,7 +14,7 @@ public interface MeetingService {
     //미팅 수정
     public long updateMeeting(UpdateMeetingRequestDto updateMeetingRequestDto, String username);
     //미팅 삭제
-    public long deleteMeeting(DeleteMeetingRequestDto deleteMeetingRequestDto, String username);
+    public long deleteMeeting(long meetingId, String username);
     //미팅 목록 조회
     public List<MeetingListResponseDto> getMeetingList(long studyId, String username);
     //미팅 상세 조회

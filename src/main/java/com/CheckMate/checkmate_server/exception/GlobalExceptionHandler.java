@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
         log.warn("잘못된 요청: {}", e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(400, e.getMessage()));
+                .body(ApiResponse.error(e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
         log.warn("유효성 검증 실패: {}", message);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(400, message));
+                .body(ApiResponse.error(message));
     }
 
     @ExceptionHandler(Exception.class)
@@ -39,6 +39,6 @@ public class GlobalExceptionHandler {
         log.error("Exception 발생: ", e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500,"INTERNAL_SERVER_ERROR"));
+                .body(ApiResponse.error("INTERNAL_SERVER_ERROR"));
     }
 }
