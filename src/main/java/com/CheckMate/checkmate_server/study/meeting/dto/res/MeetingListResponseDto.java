@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MeetingListResponseDto {
-    long meetingId;
-    LocalDateTime time;
-    String title;
+    private long meetingId;
+    private LocalDateTime time;
+    private String title;
 }
