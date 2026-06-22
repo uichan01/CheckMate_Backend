@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 public class CreateMeetingRequestDto {
+
+    long studyId;
     
     LocalDateTime meetingTime;
 
