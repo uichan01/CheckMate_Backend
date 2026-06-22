@@ -43,8 +43,31 @@ public class StudyGroupController {
     // 스터디 그룹 상세 조회
     @GetMapping("/group/{study_id}")
     public ResponseEntity<ApiResponse<StudyGroupDetailResponseDto>> getStudyGroupDetails(@PathVariable long studyId) {
-        StudyGroupDetailResponseDto responseDto = groupService.
-        return null;
+        StudyGroupDetailResponseDto responseDto = groupService.getStudyGroupDetails(studyId);
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
+
+    // 스터디 그룹 수정
+
+    // 스터디 그룹 삭제(ON DELETE CASCADE, 이후에 작성)
+
+    // 스터디 인원 추가
+
+
+    // 스터디 인원 삭제
+
+
+
+    // 내가 속한 스터디 그룹 목록 조회
+
+    // 스터디원 역할 변경
+
+    // 스터디 그룹 신청
+
+    // 스터디 그룹 신청 목록 조회
+
+    // 스터디 신청 승인
+
+    // 스터디 신청 거절
 
 }

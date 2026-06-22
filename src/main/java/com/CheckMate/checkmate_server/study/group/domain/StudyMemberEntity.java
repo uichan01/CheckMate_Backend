@@ -23,6 +23,7 @@ public class StudyMemberEntity {
         this.role = role;
         this.status = status;
     }
+
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     @Column(name="study_member_id")

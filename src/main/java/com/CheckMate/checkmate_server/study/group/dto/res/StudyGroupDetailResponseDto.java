@@ -1,11 +1,13 @@
 package com.CheckMate.checkmate_server.study.group.dto.res;
 
+import com.CheckMate.checkmate_server.study.dto.SimpleUserDto;
 import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -15,13 +17,15 @@ public class StudyGroupDetailResponseDto {
     private String description;
     private String categoryName;
     private LocalDateTime createdAt;
+    private List<SimpleUserDto> members;
 
-    public static StudyGroupDetailResponseDto from(StudyGroupEntity groupEntity) {
+    public static StudyGroupDetailResponseDto from(StudyGroupEntity groupEntity, List<SimpleUserDto> members) {
         return new StudyGroupDetailResponseDto(
                 groupEntity.getTitle(),
                 groupEntity.getDescription(),
                 groupEntity.getCategoryEntity().getCategoryName(),
-                groupEntity.getCreatedAt()
+                groupEntity.getCreatedAt(),
+                members
         );
     }
 }

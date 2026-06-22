@@ -3,6 +3,7 @@ package com.CheckMate.checkmate_server.study.group.service;
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
 import com.CheckMate.checkmate_server.study.category.service.StudyCategoryService;
+import com.CheckMate.checkmate_server.study.dto.SimpleUserDto;
 import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
 import com.CheckMate.checkmate_server.study.group.domain.StudyMemberEntity;
 import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +34,7 @@ public class StudyGroupService {
     private final UserRepository userRepository;
 
     // 스터디 그룹 생성
+    @Transactional
     public Long createStudyGroup(@NonNull StudyGroupRequestDto request, String myEmail) {
         // 카테고리id를 받아서 엔티티 획득
         Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
@@ -68,6 +71,7 @@ public class StudyGroupService {
     }
 
     // 스터디 그룹을 조건에 맞게 목록 조회
+    @Transactional
     public List<StudyGroupResponseDto> searchStudyGroups(StudyGroupSearchRequest request) {
         // 키워드와 카테고리 id 획득
         String keyword = request.getKeyword();
@@ -98,11 +102,22 @@ public class StudyGroupService {
     }
     
     // 스터디 그룹의 상세 조회
+    @Transactional
     public StudyGroupDetailResponseDto getStudyGroupDetails(Long studyId) {
+        // 스터디id로 스터디그룹엔티티 획득
         StudyGroupEntity studyGroupEntity = studyGroupRepository.findById(studyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 스터디 그룹은 존재하지 않습니다."));
 
-        
-        return null;
+        // 해당 스터디 그룹에 속한 멤버 목록 획득
+        List<SimpleUserDto> studyMembers = studyMemberRepository.findByStudyGroupEntity_StudyIdAndStatus(
+                studyId, StudyMemberStatus.STATUS_ACTIVE)
+                .stream().map((member) -> SimpleUserDto.builder()
+                        .userId(member.getUserEntity().getUserId())
+                        .nickName(member.getUserEntity().getNickname())
+                        .build()
+        ).toList();
+        return StudyGroupDetailResponseDto.from(studyGroupEntity, studyMembers);
     }
+
+
 }
