@@ -11,7 +11,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="study_members")
+@Table(
+        name = "study_members",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_study_member_study_user",
+                        columnNames = {"study_id", "user_id"}
+                )
+        }
+)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -55,6 +63,10 @@ public class StudyMemberEntity {
 
     public void setRoleManager() {
         this.role = StudyMemberRole.ROLE_MANAGER;
+    }
+
+    public void pending() {
+        this.status = StudyMemberStatus.STATUS_PENDING;
     }
 
     public void active() {

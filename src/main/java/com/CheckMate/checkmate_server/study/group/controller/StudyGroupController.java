@@ -3,6 +3,7 @@ package com.CheckMate.checkmate_server.study.group.controller;
 import com.CheckMate.checkmate_server.response.ApiResponse;
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberStatus;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
@@ -41,8 +42,9 @@ public class StudyGroupController {
 
     // 스터디 그룹 상세 조회
     @GetMapping("/{studyId}")
-    public ResponseEntity<ApiResponse<StudyGroupDetailResponseDto>> getStudyGroupDetails(@PathVariable long studyId) {
-        StudyGroupDetailResponseDto responseDto = groupService.getStudyGroupDetails(studyId);
+    public ResponseEntity<ApiResponse<StudyGroupDetailResponseDto>> getStudyGroupDetails(@PathVariable long studyId,
+                                                                                         @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        StudyGroupDetailResponseDto responseDto = groupService.getStudyGroupDetails(studyId, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
@@ -85,7 +87,12 @@ public class StudyGroupController {
         return ResponseEntity.ok(ApiResponse.success(studyMemberId));
     }
     // 스터디 그룹 신청
-
+    @PostMapping("/{studyId}/request")
+    public ResponseEntity<ApiResponse<StudyMemberStatus>> requestStudyGroup(@PathVariable Long studyId,
+                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        StudyMemberStatus status = groupService.requestStudyGroup(studyId, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(status));
+    }
     // 스터디 그룹 신청 목록 조회
 
     // 스터디 신청 승인
