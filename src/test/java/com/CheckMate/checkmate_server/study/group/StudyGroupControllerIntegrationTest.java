@@ -1,6 +1,5 @@
 package com.CheckMate.checkmate_server.study.group;
 
-import com.CheckMate.checkmate_server.config.EmbeddedRedisConfig;
 import com.CheckMate.checkmate_server.security.jwt.JWTUtil;
 import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
 import com.CheckMate.checkmate_server.study.category.repository.StudyCategoryRepository;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@Import(EmbeddedRedisConfig.class)
 class StudyGroupControllerIntegrationTest {
 
     @Autowired MockMvc mockMvc;
