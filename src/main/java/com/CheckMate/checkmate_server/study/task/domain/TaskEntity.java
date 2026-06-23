@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "tasks")
 @Getter
@@ -28,5 +30,12 @@ public class TaskEntity {
     @Column(name = "title", length = 255, nullable = false)
     private String title;
 
+    @Column(name = "content", columnDefinition = "TEXT")
+    private String content;
 
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }
