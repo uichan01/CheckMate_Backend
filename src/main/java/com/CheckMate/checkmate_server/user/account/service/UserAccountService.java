@@ -5,7 +5,7 @@ import com.CheckMate.checkmate_server.user.account.dto.res.MyInfoResponseDto;
 import com.CheckMate.checkmate_server.user.account.dto.res.UserInfoResponseDto;
 
 public interface UserAccountService {
-    public MyInfoResponseDto getMyInfo(String email);
-    public UserInfoResponseDto getUserInfo(String nickname);
-    public void updateMyInfo(String email, UpdateMyInfoRequestDto request);
+    MyInfoResponseDto getMyInfo(Long userId);
+    UserInfoResponseDto getUserInfo(String nickname);
+    void updateMyInfo(Long userId, UpdateMyInfoRequestDto request);
 }

@@ -10,17 +10,17 @@ import java.util.List;
 
 public interface MeetingService {
     //미팅 추가
-    public long createMeeting(CreateMeetingRequestDto createMeetingRequestDto, String username);
+    long createMeeting(CreateMeetingRequestDto createMeetingRequestDto, Long userId);
     //미팅 수정
-    public long updateMeeting(UpdateMeetingRequestDto updateMeetingRequestDto, String username);
+    long updateMeeting(UpdateMeetingRequestDto updateMeetingRequestDto, Long userId);
     //미팅 삭제
-    public long deleteMeeting(long meetingId, String username);
+    long deleteMeeting(long meetingId, Long userId);
     //미팅 목록 조회
-    public List<MeetingListResponseDto> getMeetingList(long studyId, String username);
+    List<MeetingListResponseDto> getMeetingList(long studyId, Long userId);
     //미팅 상세 조회
-    public MeetingDetailResponseDto getMeetingDetail(long meetingId, String username);
+    MeetingDetailResponseDto getMeetingDetail(long meetingId, Long userId);
     //미팅 참석
-    public void participateMeeting(long meetingId, String username);
+    void participateMeeting(long meetingId, Long userId);
     //미팅 출석
-    public void attendanceMeeting(long meetingId, String username);
+    void attendanceMeeting(long meetingId, Long userId);
 }

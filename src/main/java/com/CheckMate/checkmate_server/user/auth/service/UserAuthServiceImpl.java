@@ -42,6 +42,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         UserEntity savedUser = userRepository.save(user);
 
         String token = jwtUtil.createJwt(
+                savedUser.getUserId(),
                 savedUser.getEmail(),
                 UserRole.ROLE_USER.name(),
                 TOKEN_EXPIRE_MS

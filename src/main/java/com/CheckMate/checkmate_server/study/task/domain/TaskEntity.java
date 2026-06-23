@@ -1,6 +1,5 @@
 package com.CheckMate.checkmate_server.study.task.domain;
 
-
 import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
 import com.CheckMate.checkmate_server.user.domain.UserEntity;
 import jakarta.persistence.*;

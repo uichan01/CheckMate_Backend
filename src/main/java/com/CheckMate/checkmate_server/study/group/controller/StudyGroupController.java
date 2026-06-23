@@ -26,7 +26,7 @@ public class StudyGroupController {
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> createStudyGroup(@Valid @RequestBody StudyGroupRequestDto request,
                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        long studyGroupId = groupService.createStudyGroup(request, customUserDetails.getUsername());
+        long studyGroupId = groupService.createStudyGroup(request, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(studyGroupId));
     }
 

@@ -47,7 +47,7 @@ class StudyGroupControllerIntegrationTest {
         UserEntity user = userRepository.save(
                 new UserEntity("user@test.com", passwordEncoder.encode("pw"), "", "User", UserRole.ROLE_USER));
         category = studyCategoryRepository.save(new StudyCategoryEntity(null, "개발"));
-        userToken = "Bearer " + jwtUtil.createJwt("user@test.com", "ROLE_USER", 3_600_000L);
+        userToken = "Bearer " + jwtUtil.createJwt(user.getUserId(), "user@test.com", "ROLE_USER", 3_600_000L);
     }
 
     @Test

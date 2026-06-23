@@ -25,12 +25,12 @@ public class UserAccountServiceImpl implements UserAccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public MyInfoResponseDto getMyInfo(String email) {
-        UserEntity user = userRepository.findByEmail(email)
+    public MyInfoResponseDto getMyInfo(Long userId) {
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         List<MyStudyDto> studies = studyMemberRepository
-                .findByUserEntity_UserIdAndStatus(user.getUserId(), StudyMemberStatus.STATUS_ACTIVE)
+                .findByUserEntity_UserIdAndStatus(userId, StudyMemberStatus.STATUS_ACTIVE)
                 .stream()
                 .map(MyStudyDto::from)
                 .toList();
@@ -67,8 +67,8 @@ public class UserAccountServiceImpl implements UserAccountService {
 
     @Override
     @Transactional
-    public void updateMyInfo(String email, UpdateMyInfoRequestDto request) {
-        UserEntity user = userRepository.findByEmail(email)
+    public void updateMyInfo(Long userId, UpdateMyInfoRequestDto request) {
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         String encodedPassword = request.getPassword() != null

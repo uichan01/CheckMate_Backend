@@ -12,8 +12,13 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
     void deleteByMeetingEntity_MeetingId(Long meetingId);
     List<MeetingParticipantEntity> findByMeetingEntity_MeetingId(Long meetingId);
     boolean existsByMeetingEntity_MeetingIdAndUserEntity_Email(Long meetingId, String email);
+    boolean existsByMeetingEntity_MeetingIdAndUserEntity_UserId(Long meetingId, Long userId);
     Optional<MeetingParticipantEntity> findByMeetingEntity_MeetingIdAndUserEntity_Email(
             Long meetingId,
             String email
+    );
+    Optional<MeetingParticipantEntity> findByMeetingEntity_MeetingIdAndUserEntity_UserId(
+            Long meetingId,
+            Long userId
     );
 }

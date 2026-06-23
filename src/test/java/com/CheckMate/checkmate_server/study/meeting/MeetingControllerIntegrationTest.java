@@ -101,10 +101,10 @@ class MeetingControllerIntegrationTest {
                 .meetingPlace("서울 종로")
                 .build());
 
-        ownerToken   = "Bearer " + jwtUtil.createJwt("owner@test.com",   "ROLE_USER", 3_600_000L);
-        memberToken  = "Bearer " + jwtUtil.createJwt("member@test.com",  "ROLE_USER", 3_600_000L);
-        pendingToken = "Bearer " + jwtUtil.createJwt("pending@test.com", "ROLE_USER", 3_600_000L);
-        outsiderToken= "Bearer " + jwtUtil.createJwt("outsider@test.com","ROLE_USER", 3_600_000L);
+        ownerToken   = "Bearer " + jwtUtil.createJwt(ownerUser.getUserId(),   "owner@test.com",   "ROLE_USER", 3_600_000L);
+        memberToken  = "Bearer " + jwtUtil.createJwt(memberUser.getUserId(),  "member@test.com",  "ROLE_USER", 3_600_000L);
+        pendingToken = "Bearer " + jwtUtil.createJwt(pendingUser.getUserId(), "pending@test.com", "ROLE_USER", 3_600_000L);
+        outsiderToken= "Bearer " + jwtUtil.createJwt(outsiderUser.getUserId(),"outsider@test.com","ROLE_USER", 3_600_000L);
     }
 
     // 1. 미팅 생성 성공

@@ -30,7 +30,7 @@ public class TaskController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody TaskCreateRequest request
     ) {
-        taskService.createTask(userDetails.getUsername(), request);
+        taskService.createTask(userDetails.getUserId(), request);
         return ApiResponse.success();
     }
 
@@ -40,7 +40,7 @@ public class TaskController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody TaskUpdateRequest request
     ) {
-        taskService.updateTask(userDetails.getUsername(), request);
+        taskService.updateTask(userDetails.getUserId(), request);
         return ApiResponse.success();
     }
 
@@ -50,7 +50,7 @@ public class TaskController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long taskId
     ) {
-        taskService.deleteTask(userDetails.getUsername(), taskId);
+        taskService.deleteTask(userDetails.getUserId(), taskId);
         return ApiResponse.success();
     }
 
@@ -79,7 +79,7 @@ public class TaskController {
             @PathVariable Long taskId,
             @Valid @RequestBody TaskSubmitRequest request
     ) {
-        taskService.submitTask(userDetails.getUsername(), taskId, request);
+        taskService.submitTask(userDetails.getUserId(), taskId, request);
         return ApiResponse.success();
     }
 
