@@ -22,9 +22,6 @@ public class PersonalCalendarUpdateRequest {
     @NotNull(message = "시작 시간은 필수입니다.")
     private LocalDateTime startTime;
 
-    @NotNull(message = "종료 시간은 필수입니다.")
-    private LocalDateTime endTime;
-
     @Size(max = 50, message = "장소는 50자 이하로 입력해주세요.")
     private String place;
 }

@@ -9,6 +9,8 @@ import com.CheckMate.checkmate_server.response.ApiResponse;
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,17 +25,19 @@ public class PersonalCalendarController {
 
     // 개인 일정 추가
     @PostMapping
-    public ApiResponse<Void> createPersonalCalendar(
+    public ResponseEntity<ApiResponse<Void>> createPersonalCalendar(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid PersonalCalendarCreateRequest request
     ) {
         personalCalendarService.createPersonalCalendar(userDetails.getUserId(), request);
-        return ApiResponse.success();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success());
     }
 
     // 개인 일정 수정
     @PatchMapping("/{personal_calendar_id}")
-    public ApiResponse<Void> updatePersonalCalendar(
+    public ResponseEntity<ApiResponse<Void>> updatePersonalCalendar(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("personal_calendar_id") Long personalCalendarId,
             @RequestBody @Valid PersonalCalendarUpdateRequest request
@@ -43,12 +47,14 @@ public class PersonalCalendarController {
                 personalCalendarId,
                 request
         );
-        return ApiResponse.success();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success());
     }
 
     // 개인 일정 삭제
     @DeleteMapping("/{personal_calendar_id}")
-    public ApiResponse<Void> deletePersonalCalendar(
+    public ResponseEntity<ApiResponse<Void>> deletePersonalCalendar(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("personal_calendar_id") Long personalCalendarId
     ) {
@@ -56,30 +62,35 @@ public class PersonalCalendarController {
                 userDetails.getUserId(),
                 personalCalendarId
         );
-        return ApiResponse.success();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success());
     }
 
     // 개인 일정 목록 조회
     @GetMapping("/list")
-    public ApiResponse<List<PersonalCalendarListResponse>> getPersonalCalendarList(
+    public ResponseEntity<ApiResponse<List<PersonalCalendarListResponse>>> getPersonalCalendarList(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        return ApiResponse.success(
-                personalCalendarService.getPersonalCalendarList(userDetails.getUserId())
-        );
+        List<PersonalCalendarListResponse> list = personalCalendarService.getPersonalCalendarList(userDetails.getUserId());
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(list));
     }
 
     // 개인 일정 상세 조회
     @GetMapping("/{personal_calendar_id}")
-    public ApiResponse<PersonalCalendarDetailResponse> getPersonalCalendarDetail(
+    public ResponseEntity<ApiResponse<PersonalCalendarDetailResponse>> getPersonalCalendarDetail(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("personal_calendar_id") Long personalCalendarId
     ) {
-        return ApiResponse.success(
-                personalCalendarService.getPersonalCalendarDetail(
-                        userDetails.getUserId(),
-                        personalCalendarId
-                )
-        );
+        PersonalCalendarDetailResponse response = personalCalendarService.getPersonalCalendarDetail(
+                userDetails.getUserId(),
+                personalCalendarId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(response));
     }
 }
