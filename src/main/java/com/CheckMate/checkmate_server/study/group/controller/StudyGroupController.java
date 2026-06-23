@@ -50,7 +50,7 @@ public class StudyGroupController {
     public ResponseEntity<ApiResponse<Long>> updateStudyGroup(@PathVariable Long studyId,
                                                               @Valid @RequestBody StudyGroupPatchRequestDto request,
                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        long studyGroupId = groupService.updateStudyGroup(studyId, request, customUserDetails.getUsername());
+        long studyGroupId = groupService.updateStudyGroup(studyId, request, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(studyGroupId));
     }
     // 스터디 그룹 삭제(ON DELETE CASCADE, 이후에 작성)
@@ -59,8 +59,8 @@ public class StudyGroupController {
     @PostMapping("/{studyId}/members")
     public ResponseEntity<ApiResponse<Long>> addStudyMember(@PathVariable Long studyId, @RequestBody String email,
                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-
-        return null;
+        Long studyMemberId = groupService.addStudyMember(studyId, email, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(studyMemberId));
     }
 
     // 스터디 인원 삭제
