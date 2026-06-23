@@ -21,11 +21,9 @@ public class StudyGroupRequestDto {
     @Size(max=255, message = "설명글은 255자 이하여야 합니다.")
     private String description;
 
-    @NotBlank(message = "공개 범위는 필수입니다.")
-    @Size(max=20, message = "공개 법위는 20자 이하여야 합니다.")
+    @NotNull(message = "공개 범위는 필수입니다.")
     private GroupScope scope;
 
-    @NotBlank(message = "입장 정책은 필수입니다.")
-    @Size(max=20, message = "입장 정책은 20자 이하여야 합니다.")
+    @NotNull(message = "입장 정책은 필수입니다.")
     private GroupJoinPolicy joinPolicy;
 }

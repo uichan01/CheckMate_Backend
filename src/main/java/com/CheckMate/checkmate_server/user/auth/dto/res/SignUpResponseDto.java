@@ -1,4 +1,4 @@
-package com.CheckMate.checkmate_server.user.dto.res;
+package com.CheckMate.checkmate_server.user.auth.dto.res;
 
 import lombok.Builder;
 import lombok.Getter;
