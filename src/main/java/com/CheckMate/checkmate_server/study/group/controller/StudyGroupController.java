@@ -53,7 +53,7 @@ public class StudyGroupController {
         long studyGroupId = groupService.updateStudyGroup(studyId, request, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(studyGroupId));
     }
-    // 스터디 그룹 삭제(ON DELETE CASCADE, 이후에 작성)
+    // TODO: 스터디 그룹 삭제(ON DELETE CASCADE, 이후에 작성), Spring scheduler로 삭제 예약, 일괄 삭제 로직
 
     // 스터디 인원 추가
     @PostMapping("/{studyId}/members")
@@ -64,7 +64,12 @@ public class StudyGroupController {
     }
 
     // 스터디 인원 삭제
-
+    @DeleteMapping("/{studyId}/members")
+    public ResponseEntity<ApiResponse<Long>> removeStudyMember(@PathVariable Long studyId, @RequestBody String email,
+                                                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long removeUserId = groupService.removeStudyMember(studyId, email, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(removeUserId));
+    }
     // 내가 속한 스터디 그룹 목록 조회
 
     // 스터디원 역할 변경
