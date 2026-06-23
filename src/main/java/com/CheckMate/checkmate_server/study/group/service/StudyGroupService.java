@@ -37,7 +37,7 @@ public class StudyGroupService {
 
     // 스터디 그룹 생성
     @Transactional
-    public Long createStudyGroup(@NonNull StudyGroupRequestDto request, String myEmail) {
+    public Long createStudyGroup(@NonNull StudyGroupRequestDto request, Long userId) {
         // 카테고리id를 받아서 엔티티 획득
         Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
 
@@ -45,9 +45,6 @@ public class StudyGroupService {
         StudyCategoryEntity categoryEntity = studyCategoryEntity
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
 
-        // 자신의 이메일을 기반으로 userEntity를 찾고, 없으면 예외 throw
-        UserEntity userEntity = userRepository.findByEmail(myEmail).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
-        
         // 스터디 그룹 엔티티 생성
         StudyGroupEntity entity = StudyGroupEntity.builder()
                 .categoryEntity(categoryEntity)
@@ -58,6 +55,8 @@ public class StudyGroupService {
                 .build();
         // 생성
         StudyGroupEntity savedEntity = studyGroupRepository.save(entity);
+        // userId를 기반으로 userEntity를 찾고, 없으면 예외 throw
+        UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         // 자신을 스터디 장으로 임명
         StudyMemberEntity memberEntity = StudyMemberEntity.builder()
                 .studyGroupEntity(savedEntity)
