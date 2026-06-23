@@ -150,7 +150,10 @@ public class StudyGroupService {
         return studyGroup.getStudyId();
     }
 
-
+    @Transactional
+    public Long addStudyMember(Long studyId, Long userId, Long myId) {
+        return null;
+    }
     ////////////////////////////////////////////////////////////////////////////////////
 
     // 주어진 studyId에 대한 자신의 권한 확인
