@@ -57,18 +57,20 @@ public class TaskController {
     // 과제 목록 조회
     @GetMapping("/list/{studyId}")
     public ApiResponse<List<TaskListResponse>> getTaskList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long studyId
     ) {
-        List<TaskListResponse> response = taskService.getTaskList(studyId);
+        List<TaskListResponse> response = taskService.getTaskList(userDetails.getUserId(), studyId);
         return ApiResponse.success(response);
     }
 
     // 과제 상세 조회
     @GetMapping("/{taskId}")
     public ApiResponse<TaskDetailResponse> getTaskDetail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long taskId
     ) {
-        TaskDetailResponse response = taskService.getTaskDetail(taskId);
+        TaskDetailResponse response = taskService.getTaskDetail(userDetails.getUserId(), taskId);
         return ApiResponse.success(response);
     }
 
@@ -86,18 +88,20 @@ public class TaskController {
     // 특정 과제 제출 목록 조회
     @GetMapping("/submission/{taskId}/list")
     public ApiResponse<List<TaskSubmissionListResponse>> getSubmissionList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long taskId
     ) {
-        List<TaskSubmissionListResponse> response = taskService.getSubmissionList(taskId);
+        List<TaskSubmissionListResponse> response = taskService.getSubmissionList(userDetails.getUserId(), taskId);
         return ApiResponse.success(response);
     }
 
     // 과제 제출 상세 조회
     @GetMapping("/submission/{submissionId}")
     public ApiResponse<TaskSubmissionDetailResponse> getSubmissionDetail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long submissionId
     ) {
-        TaskSubmissionDetailResponse response = taskService.getSubmissionDetail(submissionId);
+        TaskSubmissionDetailResponse response = taskService.getSubmissionDetail(userDetails.getUserId(), submissionId);
         return ApiResponse.success(response);
     }
 }

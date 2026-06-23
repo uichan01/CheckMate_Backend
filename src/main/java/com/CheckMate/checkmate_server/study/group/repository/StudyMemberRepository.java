@@ -10,10 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface StudyMemberRepository extends JpaRepository<StudyMemberEntity, Long> {
-    Optional<StudyMemberEntity> findByStudyGroupEntity_StudyIdAndUserEntity_Email(
-            Long studyId,
-            String email
-    );
     Optional<StudyMemberEntity> findByStudyGroupEntity_StudyIdAndUserEntity_UserId(
             Long studyId,
             Long userId
