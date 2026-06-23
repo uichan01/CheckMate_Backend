@@ -18,31 +18,27 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        //rAuthorization 헤더를 찾음
         String authorization = request.getHeader("Authorization");
 
-        //Authorization 헤더 검증
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-
-            System.out.println("token null");
             filterChain.doFilter(request, response);
-
             return;
         }
 
-        System.out.println("authorization now");
         String token = authorization.split(" ")[1];
 
-        //토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
-
-            System.out.println("token expired");
             filterChain.doFilter(request, response);
+            return;
+        }
 
+        if (tokenBlacklistService.isBlacklisted(token)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
