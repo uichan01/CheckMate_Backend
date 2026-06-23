@@ -1,15 +1,26 @@
 package com.CheckMate.checkmate_server.study.group.service;
 
+import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
 import com.CheckMate.checkmate_server.study.category.service.StudyCategoryService;
+import com.CheckMate.checkmate_server.study.dto.SimpleUserDto;
 import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberEntity;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberStatus;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
+import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupResponseDto;
 import com.CheckMate.checkmate_server.study.group.repository.StudyGroupRepository;
+import com.CheckMate.checkmate_server.study.group.repository.StudyMemberRepository;
+import com.CheckMate.checkmate_server.user.domain.UserEntity;
+import com.CheckMate.checkmate_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,39 +29,60 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class StudyGroupService {
     private final StudyGroupRepository studyGroupRepository;
+    private final StudyMemberRepository studyMemberRepository;
     private final StudyCategoryService studyCategoryService;
+    private final UserRepository userRepository;
 
     // 스터디 그룹 생성
-    public Long createStudyGroup(@NonNull StudyGroupRequestDto request) {
+    @Transactional
+    public Long createStudyGroup(@NonNull StudyGroupRequestDto request, String myEmail) {
         // 카테고리id를 받아서 엔티티 획득
         Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
+
         // 해당 엔티티가 없으면 예외 throw
         StudyCategoryEntity categoryEntity = studyCategoryEntity
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
-
-        StudyGroupEntity entity = StudyGroupEntity.create(
-                categoryEntity,
-                request.getTitle(),
-                request.getDescription(),
-                request.getScope(),
-                request.getJoinPolicy()
-        );
+        
+        // 스터디 그룹 엔티티 생성
+        StudyGroupEntity entity = StudyGroupEntity.builder()
+                .categoryEntity(categoryEntity)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .scope(request.getScope())
+                .joinPolicy(request.getJoinPolicy())
+                .build();
         // 생성
         StudyGroupEntity savedEntity = studyGroupRepository.save(entity);
+        // 자신의 이메일을 기반으로 userEntity를 찾고, 없으면 예외 throw
+        UserEntity userEntity = userRepository.findByEmail(myEmail).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+        // 자신을 스터디 장으로 임명
+        StudyMemberEntity memberEntity = StudyMemberEntity.builder()
+                .studyGroupEntity(savedEntity)
+                .userEntity(userEntity)
+                .role(StudyMemberRole.ROLE_OWNER)
+                .status(StudyMemberStatus.STATUS_ACTIVE)
+                .build();
+
+        // 스터디 멤버에 저장
+        studyMemberRepository.save(memberEntity);
+
         // 스터디id 반환
         return savedEntity.getStudyId();
     }
 
-    // 조건에 맞게 목록 조회
+    // 스터디 그룹을 조건에 맞게 목록 조회
+    @Transactional
     public List<StudyGroupResponseDto> searchStudyGroups(StudyGroupSearchRequest request) {
+        // 키워드와 카테고리 id 획득
         String keyword = request.getKeyword();
         Long categoryId = request.getCategoryId();
 
+        // 키워드와 카테고리id 존재 여부
         boolean hasKeyword = keyword != null && !keyword.isBlank();
         boolean hasCategory = categoryId != null;
 
         List<StudyGroupEntity> studyGroups;
-
+        // 값의 존재 여부에 따라 적절한 메소드로 find 호출
         if (hasKeyword && hasCategory) {
             studyGroups = studyGroupRepository
                     .findByTitleContainingAndCategoryEntity_CategoryId(keyword, categoryId);
@@ -63,10 +95,29 @@ public class StudyGroupService {
         } else {
             studyGroups = studyGroupRepository.findAll();
         }
-
+        // Entity를 ResponseDto로 변환하며 List로 반환
         return studyGroups.stream()
                 .map(StudyGroupResponseDto::from)
                 .toList();
     }
+    
+    // 스터디 그룹의 상세 조회
+    @Transactional
+    public StudyGroupDetailResponseDto getStudyGroupDetails(Long studyId) {
+        // 스터디id로 스터디그룹엔티티 획득
+        StudyGroupEntity studyGroupEntity = studyGroupRepository.findById(studyId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 스터디 그룹은 존재하지 않습니다."));
+
+        // 해당 스터디 그룹에 속한 멤버 목록 획득
+        List<SimpleUserDto> studyMembers = studyMemberRepository.findByStudyGroupEntity_StudyIdAndStatus(
+                studyId, StudyMemberStatus.STATUS_ACTIVE)
+                .stream().map((member) -> SimpleUserDto.builder()
+                        .userId(member.getUserEntity().getUserId())
+                        .nickName(member.getUserEntity().getNickname())
+                        .build()
+        ).toList();
+        return StudyGroupDetailResponseDto.from(studyGroupEntity, studyMembers);
+    }
+
 
 }
