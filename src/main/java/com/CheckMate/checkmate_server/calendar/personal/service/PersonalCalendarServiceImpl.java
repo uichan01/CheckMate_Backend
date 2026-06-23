@@ -4,9 +4,11 @@ import com.CheckMate.checkmate_server.calendar.personal.dto.req.PersonalCalendar
 import com.CheckMate.checkmate_server.calendar.personal.dto.req.PersonalCalendarUpdateRequest;
 import com.CheckMate.checkmate_server.calendar.personal.dto.res.PersonalCalendarDetailResponse;
 import com.CheckMate.checkmate_server.calendar.personal.dto.res.PersonalCalendarListResponse;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class PersonalCalendarServiceImpl implements PersonalCalendarService{
 
     @Override
