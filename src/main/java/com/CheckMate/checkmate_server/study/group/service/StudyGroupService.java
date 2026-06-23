@@ -4,10 +4,7 @@ import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
 import com.CheckMate.checkmate_server.study.category.service.StudyCategoryService;
 import com.CheckMate.checkmate_server.study.dto.SimpleUserDto;
-import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
-import com.CheckMate.checkmate_server.study.group.domain.StudyMemberEntity;
-import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
-import com.CheckMate.checkmate_server.study.group.domain.StudyMemberStatus;
+import com.CheckMate.checkmate_server.study.group.domain.*;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
@@ -110,11 +107,12 @@ public class StudyGroupService {
     
     // 스터디 그룹의 상세 조회
     @Transactional
-    public StudyGroupDetailResponseDto getStudyGroupDetails(Long studyId) {
+    public StudyGroupDetailResponseDto getStudyGroupDetails(Long studyId, Long userId) {
         // 스터디id로 스터디그룹엔티티 획득
         StudyGroupEntity studyGroupEntity = studyGroupRepository.findById(studyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 스터디 그룹은 존재하지 않습니다."));
 
+        // 비공개거나 공유 전용 페이지는 권한이 있어야 볼 수 있음
         // 해당 스터디 그룹에 속한 멤버 목록 획득
         List<SimpleUserDto> studyMembers = studyMemberRepository.findByStudyGroupEntity_StudyIdAndStatus(
                 studyId, StudyMemberStatus.STATUS_ACTIVE)
@@ -123,6 +121,15 @@ public class StudyGroupService {
                         .nickName(member.getUserEntity().getNickname())
                         .build()
         ).toList();
+
+        if(studyGroupEntity.getScope() == GroupScope.SCOPE_PRIVATE
+            || studyGroupEntity.getScope() == GroupScope.SCOPE_SHARED) {
+
+            if(studyMembers.stream().noneMatch(simpleUserDto ->
+                    userId.equals(simpleUserDto.getUserId())))
+                throw new IllegalArgumentException("스터디에 접근할 권한이 없습니다.");
+        }
+
         log.info("{} 스터디 상세 조회 요청", studyId);
         return StudyGroupDetailResponseDto.from(studyGroupEntity, studyMembers);
     }
@@ -232,6 +239,7 @@ public class StudyGroupService {
         ).stream().map(StudyMemberEntity::getStudyGroupEntity).map(StudyGroupResponseDto::from).toList();
     }
 
+    // 스터디 역할 변경
     @Transactional
     public Long setStudyMemberRole(Long studyId, String memberEmail, StudyMemberRole role, Long userId) {
         // 자신의 권한 검증
@@ -265,6 +273,62 @@ public class StudyGroupService {
 
         return targetEntity.getStudyMemberId();
     }
+
+    // 스터디 그룹 신청
+    @Transactional
+    public StudyMemberStatus requestStudyGroup(Long studyId, Long userId) {
+        // 스터디 그룹 획득
+        StudyGroupEntity studyGroupEntity = studyGroupRepository.findById(studyId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 스터디입니다."));
+
+        // 스터디 그룹에 가입 가능한지
+        if(studyGroupEntity.getScope() == GroupScope.SCOPE_PRIVATE || studyGroupEntity.getScope() == GroupScope.SCOPE_SHARED)
+            throw new IllegalArgumentException("비공개 스터디에는 가입 신청할 수 없습니다.");
+
+        // 스터디 그룹의 가입 정책에 따른 초기 상태 지정
+        final StudyMemberStatus initialStatus = (studyGroupEntity.getJoinPolicy() == GroupJoinPolicy.JOIN_POLICY_INSTANT) ?
+                StudyMemberStatus.STATUS_ACTIVE : StudyMemberStatus.STATUS_PENDING;
+
+        // 자신이 이미 가입중, 신청중, 차단된 스터디는 신청 불가
+        Optional<StudyMemberEntity> optionalStudyMember = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserId(
+                studyId,
+                userId
+        );
+
+        if(optionalStudyMember.isPresent()) {
+            StudyMemberEntity studyMember = optionalStudyMember.get();
+            switch (studyMember.getStatus()) {
+                case STATUS_ACTIVE -> throw new IllegalArgumentException("이미 가입된 스터디입니다.");
+                case STATUS_PENDING -> throw new IllegalArgumentException("이미 신청한 스터디입니다.");
+                case STATUS_BANNED -> throw new IllegalArgumentException("차단당한 스터디입니다.");
+                case STATUS_LEFT -> studyMember.pending();
+                default -> throw new IllegalArgumentException("존재하지 않는 상태입니다.");
+            }
+            // 즉시 승인되는 스터디는 즉시 활성화되도록
+            if(studyGroupEntity.getJoinPolicy() == GroupJoinPolicy.JOIN_POLICY_INSTANT)
+                studyMember.active();
+
+            // 로깅
+            log.info("{} 사용자가 {} 스터디 그룹에 가입 신청", userId, studyId);
+            return studyMember.getStatus();
+        }
+
+        // 새로운 객체 생성
+        StudyMemberEntity studyMember = StudyMemberEntity.builder()
+                .studyGroupEntity(studyGroupEntity)
+                .userEntity(userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다.")))
+                .role(StudyMemberRole.ROLE_MEMBER)
+                .status(initialStatus)
+                .build();
+        // 추가
+        studyMemberRepository.save(studyMember);
+
+        // 로깅
+        log.info("{} 사용자가 {} 스터디 그룹에 가입 신청", userId, studyId);
+        // 현 상태 반환
+        return studyMember.getStatus();
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////////
 
     // 주어진 studyId에 대한 자신의 Owner 권한 확인
@@ -298,5 +362,7 @@ public class StudyGroupService {
         }
         return studyMember;
     }
+
+
 
 }
