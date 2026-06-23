@@ -8,6 +8,7 @@ import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequest
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
+import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupRequestResponseDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupResponseDto;
 import com.CheckMate.checkmate_server.study.group.service.StudyGroupService;
 import jakarta.validation.Valid;
@@ -94,7 +95,11 @@ public class StudyGroupController {
         return ResponseEntity.ok(ApiResponse.success(status));
     }
     // 스터디 그룹 신청 목록 조회
+    @GetMapping("/{studyId}/request")
+    public ResponseEntity<ApiResponse<StudyGroupRequestResponseDto>> getStudyGroupRequestList(@PathVariable Long studyId,
+                                                                                              @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
+    }
     // 스터디 신청 승인
 
     // 스터디 신청 거절
