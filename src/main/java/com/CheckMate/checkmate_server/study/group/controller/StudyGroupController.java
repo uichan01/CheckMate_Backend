@@ -96,9 +96,12 @@ public class StudyGroupController {
     }
     // 스터디 그룹 신청 목록 조회
     @GetMapping("/{studyId}/request")
-    public ResponseEntity<ApiResponse<StudyGroupRequestResponseDto>> getStudyGroupRequestList(@PathVariable Long studyId,
+    public ResponseEntity<ApiResponse<List<StudyGroupRequestResponseDto>>> getStudyGroupRequestList(@PathVariable Long studyId,
                                                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-
+        List<StudyGroupRequestResponseDto> list = groupService.getStudyGroupRequestList(
+                studyId, customUserDetails.getUserId()
+        );
+        return ResponseEntity.ok(ApiResponse.success(list));
     }
     // 스터디 신청 승인
 
