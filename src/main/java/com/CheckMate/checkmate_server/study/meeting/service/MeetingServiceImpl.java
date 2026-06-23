@@ -31,8 +31,8 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     @Transactional
-    public long createMeeting(CreateMeetingRequestDto createMeetingRequestDto, String username) {
-        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_Email(createMeetingRequestDto.getStudyId(), username)
+    public long createMeeting(CreateMeetingRequestDto createMeetingRequestDto, Long userId) {
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserId(createMeetingRequestDto.getStudyId(), userId)
                 .orElseThrow(()->new IllegalArgumentException("올바르지 않은 요청입니다."));
         if(studyMemberEntity.getStatus() == StudyMemberStatus.STATUS_PENDING)
             throw new IllegalArgumentException("가입 승인 되지 않는 사용자의 요청입니다.");
@@ -54,16 +54,16 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     @Transactional
-    public long updateMeeting(UpdateMeetingRequestDto updateMeetingRequestDto, String username) {
+    public long updateMeeting(UpdateMeetingRequestDto updateMeetingRequestDto, Long userId) {
         MeetingEntity meetingEntity = meetingRepository.findById(updateMeetingRequestDto.getMeetingId())
                 .orElseThrow(() -> new IllegalArgumentException("미팅을 찾을 수 없습니다."));
 
-        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_Email(meetingEntity.getStudyGroupEntity().getStudyId(), username)
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserId(meetingEntity.getStudyGroupEntity().getStudyId(), userId)
                 .orElseThrow(()->new IllegalArgumentException("올바르지 않은 요청입니다."));
         if(studyMemberEntity.getStatus() == StudyMemberStatus.STATUS_PENDING)
             throw new IllegalArgumentException("가입 승인 되지 않는 사용자의 요청입니다.");
 
-        if(!meetingEntity.getUserEntity().getEmail().equals(username))
+        if(!meetingEntity.getUserEntity().getUserId().equals(userId))
             throw new IllegalArgumentException("미팅 생성 유저만 미팅 수정이 가능합니다.");
 
         meetingEntity.update(updateMeetingRequestDto.getTitle()
@@ -76,16 +76,16 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     @Transactional
-    public long deleteMeeting(long meetingId, String username){
+    public long deleteMeeting(long meetingId, Long userId){
         MeetingEntity meetingEntity = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("미팅을 찾을 수 없습니다."));
 
-        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_Email(meetingEntity.getStudyGroupEntity().getStudyId(), username)
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserId(meetingEntity.getStudyGroupEntity().getStudyId(), userId)
                 .orElseThrow(()->new IllegalArgumentException("올바르지 않은 요청입니다."));
         if(studyMemberEntity.getStatus() == StudyMemberStatus.STATUS_PENDING)
             throw new IllegalArgumentException("가입 승인 되지 않는 사용자의 요청입니다.");
 
-        if(!meetingEntity.getUserEntity().getEmail().equals(username))
+        if(!meetingEntity.getUserEntity().getUserId().equals(userId))
             throw new IllegalArgumentException("미팅 생성 유저만 미팅 삭제가 가능합니다.");
 
         meetingParticipantRepository.deleteByMeetingEntity_MeetingId(meetingId);
@@ -96,8 +96,8 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MeetingListResponseDto> getMeetingList(long studyId, String username) {
-        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_Email(studyId, username)
+    public List<MeetingListResponseDto> getMeetingList(long studyId, Long userId) {
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserId(studyId, userId)
                 .orElseThrow(()->new IllegalArgumentException("올바르지 않은 요청입니다."));
         if(studyMemberEntity.getStatus() == StudyMemberStatus.STATUS_PENDING)
             throw new IllegalArgumentException("가입 승인 되지 않는 사용자의 요청입니다.");
@@ -112,11 +112,11 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     @Transactional(readOnly = true)
-    public MeetingDetailResponseDto getMeetingDetail(long meetingId, String username) {
+    public MeetingDetailResponseDto getMeetingDetail(long meetingId, Long userId) {
         MeetingEntity meetingEntity = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("미팅을 찾을 수 없습니다."));
 
-        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_Email(meetingEntity.getStudyGroupEntity().getStudyId(), username)
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserId(meetingEntity.getStudyGroupEntity().getStudyId(), userId)
                 .orElseThrow(()->new IllegalArgumentException("올바르지 않은 요청입니다."));
         if(studyMemberEntity.getStatus() == StudyMemberStatus.STATUS_PENDING)
             throw new IllegalArgumentException("가입 승인 되지 않는 사용자의 요청입니다.");
@@ -140,14 +140,14 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     @Transactional
-    public void participateMeeting(long meetingId, String username) {
+    public void participateMeeting(long meetingId, Long userId) {
         MeetingEntity meetingEntity = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("미팅을 찾을 수 없습니다."));
 
         StudyMemberEntity studyMemberEntity = studyMemberRepository
-                .findByStudyGroupEntity_StudyIdAndUserEntity_Email(
+                .findByStudyGroupEntity_StudyIdAndUserEntity_UserId(
                         meetingEntity.getStudyGroupEntity().getStudyId(),
-                        username
+                        userId
                 )
                 .orElseThrow(() -> new IllegalArgumentException("해당 스터디의 멤버만 미팅에 참여할 수 있습니다."));
 
@@ -156,7 +156,7 @@ public class MeetingServiceImpl implements MeetingService {
         }
 
         boolean alreadyParticipated = meetingParticipantRepository
-                .existsByMeetingEntity_MeetingIdAndUserEntity_Email(meetingId, username);
+                .existsByMeetingEntity_MeetingIdAndUserEntity_UserId(meetingId, userId);
 
         if (alreadyParticipated) {
             throw new IllegalArgumentException("이미 참여한 미팅입니다.");
@@ -173,12 +173,12 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     @Transactional
-    public void attendanceMeeting(long meetingId, String username) {
+    public void attendanceMeeting(long meetingId, Long userId) {
         MeetingEntity meetingEntity = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new IllegalArgumentException("미팅을 찾을 수 없습니다."));
 
         MeetingParticipantEntity participantEntity = meetingParticipantRepository
-                .findByMeetingEntity_MeetingIdAndUserEntity_Email(meetingId, username)
+                .findByMeetingEntity_MeetingIdAndUserEntity_UserId(meetingId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("미팅 참여자만 출석할 수 있습니다."));
 
         LocalDateTime now = LocalDateTime.now();

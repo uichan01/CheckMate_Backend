@@ -27,7 +27,7 @@ public class MeetingController {
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> createMeeting(@Valid @RequestBody CreateMeetingRequestDto createMeetingRequestDto,
                                                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        long meetingId = meetingService.createMeeting(createMeetingRequestDto, customUserDetails.getUsername());
+        long meetingId = meetingService.createMeeting(createMeetingRequestDto, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(meetingId));
@@ -36,7 +36,7 @@ public class MeetingController {
     @PatchMapping
     public ResponseEntity<ApiResponse<Long>> updateMeeting(@Valid @RequestBody UpdateMeetingRequestDto updateMeetingRequestDto,
                                                           @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        long meetingId = meetingService.updateMeeting(updateMeetingRequestDto, customUserDetails.getUsername());
+        long meetingId = meetingService.updateMeeting(updateMeetingRequestDto, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingId));
@@ -45,7 +45,7 @@ public class MeetingController {
     @DeleteMapping("/{meeting_id}")
     public ResponseEntity<ApiResponse<Long>> deleteMeeting(@RequestParam("meeting_id") long meetingId,
                                                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        meetingService.deleteMeeting(meetingId, customUserDetails.getUsername());
+        meetingService.deleteMeeting(meetingId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingId));
@@ -54,7 +54,7 @@ public class MeetingController {
     @GetMapping("/list/{study_id}")
     public ResponseEntity<ApiResponse<List<MeetingListResponseDto>>> getMeetingList(@RequestParam("study_id") long studyId,
                                                                                     @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        List<MeetingListResponseDto> meetingList = meetingService.getMeetingList(studyId, customUserDetails.getUsername());
+        List<MeetingListResponseDto> meetingList = meetingService.getMeetingList(studyId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingList));
@@ -63,7 +63,7 @@ public class MeetingController {
     @GetMapping("/detail/{meeting_id}")
     public ResponseEntity<ApiResponse<MeetingDetailResponseDto>> getMeetingDetail(@RequestParam("meeting_id") long meetingId,
                                                                                   @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        MeetingDetailResponseDto meetingDetail = meetingService.getMeetingDetail(meetingId, customUserDetails.getUsername());
+        MeetingDetailResponseDto meetingDetail = meetingService.getMeetingDetail(meetingId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingDetail));
@@ -73,7 +73,7 @@ public class MeetingController {
     @PostMapping("/participate/{meeting_id}")
     public ResponseEntity<ApiResponse<Void>> participateMeeting(@RequestParam("meeting_id") long meetingId,
                                                                 @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        meetingService.participateMeeting(meetingId, customUserDetails.getUsername());
+        meetingService.participateMeeting(meetingId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success());
@@ -84,7 +84,7 @@ public class MeetingController {
     @PostMapping("/attendance/{meeting_id}")
     public ResponseEntity<ApiResponse<Void>> attendanceMeeting(@RequestParam("meeting_id") long meetingId,
                                                                @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        meetingService.attendanceMeeting(meetingId, customUserDetails.getUsername());
+        meetingService.attendanceMeeting(meetingId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success());

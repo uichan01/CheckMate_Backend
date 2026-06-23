@@ -22,7 +22,7 @@ public class UserAccountController {
     //내 정보 조회
     @GetMapping("/account")
     public ResponseEntity<ApiResponse<MyInfoResponseDto>> getMyInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        MyInfoResponseDto response = userAccountService.getMyInfo(userDetails.getUsername());
+        MyInfoResponseDto response = userAccountService.getMyInfo(userDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -39,7 +39,7 @@ public class UserAccountController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UpdateMyInfoRequestDto request
     ) {
-        userAccountService.updateMyInfo(userDetails.getUsername(), request);
+        userAccountService.updateMyInfo(userDetails.getUserId(), request);
         return ResponseEntity.ok(ApiResponse.success());
     }
 }

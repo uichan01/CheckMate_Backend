@@ -22,6 +22,7 @@ public class CustomUserDetailService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다: " + username));
 
         UserDto userDto = UserDto.builder()
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .role(user.getRole().toString())
