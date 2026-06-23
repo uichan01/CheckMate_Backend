@@ -14,6 +14,8 @@ public interface StudyMemberRepository extends JpaRepository<StudyMemberEntity, 
             Long studyId,
             String email
     );
+    List<StudyMemberEntity> findByUserEntity_UserIdAndStatus(Long userId, StudyMemberStatus status);
+}
     List<StudyMemberEntity> findByStudyGroupEntity_StudyIdAndStatus(
             Long studyId,
             StudyMemberStatus status
