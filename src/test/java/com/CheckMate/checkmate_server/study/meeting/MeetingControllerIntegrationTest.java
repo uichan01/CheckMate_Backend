@@ -76,11 +76,11 @@ class MeetingControllerIntegrationTest {
 
         StudyCategoryEntity category = studyCategoryRepository.save(new StudyCategoryEntity(null, "테스트 카테고리"));
         studyGroup = studyGroupRepository.save(
-                StudyGroupEntity.create(category, "테스트 스터디", "설명", GroupScope.SCOPE_PUBLIC, GroupJoinPolicy.JOIN_POLICY_INSTANT));
+                new StudyGroupEntity(category, "테스트 스터디", "설명", GroupScope.SCOPE_PUBLIC, GroupJoinPolicy.JOIN_POLICY_INSTANT));
 
-        studyMemberRepository.save(StudyMemberEntity.create(studyGroup, ownerUser,   StudyMemberRole.ROLE_OWNER,  StudyMemberStatus.STATUS_ACTIVE));
-        studyMemberRepository.save(StudyMemberEntity.create(studyGroup, memberUser,  StudyMemberRole.ROLE_MEMBER, StudyMemberStatus.STATUS_ACTIVE));
-        studyMemberRepository.save(StudyMemberEntity.create(studyGroup, pendingUser, StudyMemberRole.ROLE_MEMBER, StudyMemberStatus.STATUS_PENDING));
+        studyMemberRepository.save(new StudyMemberEntity(studyGroup, ownerUser,   StudyMemberRole.ROLE_OWNER,  StudyMemberStatus.STATUS_ACTIVE));
+        studyMemberRepository.save(new StudyMemberEntity(studyGroup, memberUser,  StudyMemberRole.ROLE_MEMBER, StudyMemberStatus.STATUS_ACTIVE));
+        studyMemberRepository.save(new StudyMemberEntity(studyGroup, pendingUser, StudyMemberRole.ROLE_MEMBER, StudyMemberStatus.STATUS_PENDING));
 
         futureMeeting = meetingRepository.save(MeetingEntity.builder()
                 .studyGroupEntity(studyGroup)

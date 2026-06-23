@@ -1,8 +1,5 @@
 package com.CheckMate.checkmate_server.study.task.domain;
 
-package com.CheckMate.checkmate_server.study.task.domain;
-
-import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
 import com.CheckMate.checkmate_server.user.domain.UserEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -29,11 +26,11 @@ public class TaskSubmissionEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "task_id", nullable = false)
     private TaskEntity taskEntity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity userEntity;
 

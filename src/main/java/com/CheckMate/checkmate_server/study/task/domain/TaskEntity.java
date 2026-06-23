@@ -6,6 +6,7 @@ import com.CheckMate.checkmate_server.user.domain.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +18,7 @@ public class TaskEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "task_id")
-    private Long userId;
+    private Long taskId;
 
     @ManyToOne
     @JoinColumn(name = "study_id")
@@ -36,6 +37,7 @@ public class TaskEntity {
     @Column(name = "due_date")
     private LocalDateTime dueDate;
 
+    @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }

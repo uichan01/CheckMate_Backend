@@ -6,8 +6,8 @@ import com.CheckMate.checkmate_server.user.account.dto.req.UpdateMyInfoRequestDt
 import com.CheckMate.checkmate_server.user.account.dto.res.MyInfoResponseDto;
 import com.CheckMate.checkmate_server.user.account.dto.res.MyStudyDto;
 import com.CheckMate.checkmate_server.user.account.dto.res.UserInfoResponseDto;
-import com.CheckMate.checkmate_server.user.account.repository.UserRepository;
 import com.CheckMate.checkmate_server.user.domain.UserEntity;
+import com.CheckMate.checkmate_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,8 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserAccountServiceImpl implements UserAccountService {
 
-    private final com.CheckMate.checkmate_server.user.repository.UserRepository userRepository;
-    private final UserRepository userAccountRepository;
+    private final UserRepository userRepository;
     private final StudyMemberRepository studyMemberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -48,7 +47,7 @@ public class UserAccountServiceImpl implements UserAccountService {
     @Override
     @Transactional(readOnly = true)
     public UserInfoResponseDto getUserInfo(String nickname) {
-        UserEntity user = userAccountRepository.findByNickname(nickname)
+        UserEntity user = userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         List<MyStudyDto> studies = studyMemberRepository
