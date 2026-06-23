@@ -335,6 +335,7 @@ public class StudyGroupService {
     }
 
     // 스터디 신청 목록 조회
+    @Transactional
     public List<StudyGroupRequestResponseDto> getStudyGroupRequestList(Long studyId, Long userId) {
         studyGroupRepository.findById(studyId).orElseThrow(() -> new IllegalArgumentException(("존재하지 않는 스터디 그룹입니다.")));
 
@@ -358,6 +359,52 @@ public class StudyGroupService {
         }).toList();
 
         return studyMemberEntityList;
+    }
+
+    // 가입 요청 승인
+    @Transactional
+    public void approveStudyGroupRequest(Long studyMemberId, Long userId) {
+        // 해당 번호를 가져오고, 스터디 그룹을 가져옴
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findById(studyMemberId).orElseThrow(() -> new IllegalArgumentException("유효하지 않은 번호입니다."));
+        StudyGroupEntity groupEntity = studyMemberEntity.getStudyGroupEntity();
+        //권한 확인
+        StudyMemberEntity myStudyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                groupEntity.getStudyId(),
+                userId,
+                StudyMemberStatus.STATUS_ACTIVE
+        ).orElseThrow(() -> new IllegalArgumentException("자신이 스터디에 속해있지 않습니다."));
+        if(myStudyMemberEntity.getRole() == StudyMemberRole.ROLE_MEMBER)
+            throw new IllegalArgumentException("권한이 없습니다.");
+
+        // 현재 상태가 PENDING인지 확인
+        if(studyMemberEntity.getStatus() != StudyMemberStatus.STATUS_PENDING)
+            throw new IllegalArgumentException("신청 상태가 아닙니다.");
+        // 승인
+        studyMemberEntity.active();
+    }
+
+    // 가입 요청 거절
+    @Transactional
+    public void rejectStudyGroupRequest(Long studyMemberId, Long userId) {
+        // 해당 번호를 가져오고, 스터디 그룹을 가져옴
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findById(studyMemberId).orElseThrow(() -> new IllegalArgumentException("유효하지 않은 번호입니다."));
+        StudyGroupEntity groupEntity = studyMemberEntity.getStudyGroupEntity();
+        //권한 확인
+        StudyMemberEntity myStudyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                groupEntity.getStudyId(),
+                userId,
+                StudyMemberStatus.STATUS_ACTIVE
+        ).orElseThrow(() -> new IllegalArgumentException("자신이 스터디에 속해있지 않습니다."));
+
+        if(myStudyMemberEntity.getRole() == StudyMemberRole.ROLE_MEMBER)
+            throw new IllegalArgumentException("권한이 없습니다.");
+
+        // 현재 상태가 PENDING인지 확인
+        if(studyMemberEntity.getStatus() != StudyMemberStatus.STATUS_PENDING)
+            throw new IllegalArgumentException("신청 상태가 아닙니다.");
+
+        // 거부 (물리 삭제)
+        studyMemberRepository.delete(studyMemberEntity);
     }
     ////////////////////////////////////////////////////////////////////////////////////
 
