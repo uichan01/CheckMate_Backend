@@ -71,7 +71,11 @@ public class StudyGroupController {
         return ResponseEntity.ok(ApiResponse.success(removeUserId));
     }
     // 내가 속한 스터디 그룹 목록 조회
-
+    @GetMapping("/list/me")
+    public ResponseEntity<ApiResponse<List<StudyGroupResponseDto>>> getMyStudyGroups(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        List<StudyGroupResponseDto> list = groupService.getMyStudyGroups(customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
     // 스터디원 역할 변경
 
     // 스터디 그룹 신청

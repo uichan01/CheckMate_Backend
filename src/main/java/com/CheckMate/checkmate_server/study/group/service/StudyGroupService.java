@@ -215,6 +215,16 @@ public class StudyGroupService {
         log.warn("{}가 {}를 {}그룹에서 삭제", userId, targetUserEntity.getUserId(), studyGroup.getStudyId());
         return targetUserEntity.getUserId();
     }
+
+    // 자신이 속한 스터디 조회
+    @Transactional
+    public List<StudyGroupResponseDto> getMyStudyGroups(Long userId) {
+        // Entity를 ResponseDto로 변환하며 List로 반환
+        return studyMemberRepository.findByUserEntity_UserIdAndStatus(
+                userId,
+                StudyMemberStatus.STATUS_ACTIVE
+        ).stream().map(StudyMemberEntity::getStudyGroupEntity).map(StudyGroupResponseDto::from).toList();
+    }
     ////////////////////////////////////////////////////////////////////////////////////
 
     // 주어진 studyId에 대한 자신의 Owner 권한 확인
