@@ -48,4 +48,24 @@ public class StudyMemberEntity {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void setRoleMember() {
+        this.role = StudyMemberRole.ROLE_MEMBER;
+    }
+
+    public void setRoleManager() {
+        this.role = StudyMemberRole.ROLE_MANAGER;
+    }
+
+    public void active() {
+        this.status = StudyMemberStatus.STATUS_ACTIVE;
+    }
+    public void left() {
+        this.status = StudyMemberStatus.STATUS_LEFT;
+
+    }
+    public void ban() {
+        this.status = StudyMemberStatus.STATUS_BANNED;
+    }
+
 }

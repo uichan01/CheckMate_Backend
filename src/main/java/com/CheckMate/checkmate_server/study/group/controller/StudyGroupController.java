@@ -2,6 +2,7 @@ package com.CheckMate.checkmate_server.study.group.controller;
 
 import com.CheckMate.checkmate_server.response.ApiResponse;
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
@@ -53,7 +54,7 @@ public class StudyGroupController {
         long studyGroupId = groupService.updateStudyGroup(studyId, request, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(studyGroupId));
     }
-    // 스터디 그룹 삭제(ON DELETE CASCADE, 이후에 작성)
+    // TODO: 스터디 그룹 삭제(ON DELETE CASCADE, 이후에 작성), Spring scheduler로 삭제 예약, 일괄 삭제 로직
 
     // 스터디 인원 추가
     @PostMapping("/{studyId}/members")
@@ -64,11 +65,25 @@ public class StudyGroupController {
     }
 
     // 스터디 인원 삭제
-
+    @DeleteMapping("/{studyId}/members")
+    public ResponseEntity<ApiResponse<Long>> removeStudyMember(@PathVariable Long studyId, @RequestBody String email,
+                                                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long removeUserId = groupService.removeStudyMember(studyId, email, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(removeUserId));
+    }
     // 내가 속한 스터디 그룹 목록 조회
-
+    @GetMapping("/list/me")
+    public ResponseEntity<ApiResponse<List<StudyGroupResponseDto>>> getMyStudyGroups(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        List<StudyGroupResponseDto> list = groupService.getMyStudyGroups(customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
     // 스터디원 역할 변경
-
+    @PatchMapping("{studyId}/member_role/{role}")
+    public ResponseEntity<ApiResponse<Long>> setStudyMemberRole(@PathVariable Long studyId, @RequestBody String memberEmail, @PathVariable StudyMemberRole role,
+                                                              @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long studyMemberId = groupService.setStudyMemberRole(studyId, memberEmail, role, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(studyMemberId));
+    }
     // 스터디 그룹 신청
 
     // 스터디 그룹 신청 목록 조회
