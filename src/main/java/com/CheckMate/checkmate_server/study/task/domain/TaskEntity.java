@@ -3,6 +3,7 @@ package com.CheckMate.checkmate_server.study.task.domain;
 import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
 import com.CheckMate.checkmate_server.user.domain.UserEntity;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,4 +40,19 @@ public class TaskEntity {
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Builder
+    public TaskEntity(StudyGroupEntity studyGroupEntity, UserEntity userEntity, String title, String content, LocalDateTime dueDate) {
+        this.studyGroupEntity = studyGroupEntity;
+        this.userEntity = userEntity;
+        this.title = title;
+        this.content = content;
+        this.dueDate = dueDate;
+    }
+
+    public void update(String title, String content, LocalDateTime dueDate) {
+        this.title = title;
+        this.content = content;
+        this.dueDate = dueDate;
+    }
 }
