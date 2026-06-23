@@ -38,14 +38,20 @@ public class StudyGroupController {
     }
 
     // 스터디 그룹 상세 조회
-    @GetMapping("/group/{study_id}")
+    @GetMapping("/{study_id}")
     public ResponseEntity<ApiResponse<StudyGroupDetailResponseDto>> getStudyGroupDetails(@PathVariable long studyId) {
         StudyGroupDetailResponseDto responseDto = groupService.getStudyGroupDetails(studyId);
         return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
     // 스터디 그룹 수정
-
+    @PatchMapping("/{study_id}")
+    public ResponseEntity<ApiResponse<Long>> updateStudyGroup(@PathVariable Long studyId,
+                                                              @Valid @RequestBody StudyGroupRequestDto request,
+                                                              @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        long studyGroupId = groupService.updateStudyGroup(studyId, request, customUserDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success(studyGroupId));
+    }
     // 스터디 그룹 삭제(ON DELETE CASCADE, 이후에 작성)
 
     // 스터디 인원 추가
