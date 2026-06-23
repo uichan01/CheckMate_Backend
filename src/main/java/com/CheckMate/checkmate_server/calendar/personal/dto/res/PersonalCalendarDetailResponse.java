@@ -1,5 +1,6 @@
 package com.CheckMate.checkmate_server.calendar.personal.dto.res;
 
+import com.CheckMate.checkmate_server.calendar.personal.domain.UserScheduleEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,9 +18,15 @@ public class PersonalCalendarDetailResponse {
 
     private LocalDateTime startTime;
 
-    private LocalDateTime endTime;
-
-    private String place;
-
     private LocalDateTime createdAt;
+
+    public static PersonalCalendarDetailResponse from(UserScheduleEntity userScheduleEntity) {
+        return new PersonalCalendarDetailResponse(
+                userScheduleEntity.getUserScheduleId(),
+                userScheduleEntity.getTitle(),
+                userScheduleEntity.getContent(),
+                userScheduleEntity.getStartTime(),
+                userScheduleEntity.getCreatedAt()
+        );
+    }
 }
