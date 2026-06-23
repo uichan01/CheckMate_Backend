@@ -2,6 +2,7 @@ package com.CheckMate.checkmate_server.study.group.controller;
 
 import com.CheckMate.checkmate_server.response.ApiResponse;
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
@@ -77,7 +78,12 @@ public class StudyGroupController {
         return ResponseEntity.ok(ApiResponse.success(list));
     }
     // 스터디원 역할 변경
-
+    @PatchMapping("{studyId}/member_role/{role}")
+    public ResponseEntity<ApiResponse<Long>> setStudyMemberRole(@PathVariable Long studyId, @RequestBody String memberEmail, @PathVariable StudyMemberRole role,
+                                                              @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long studyMemberId = groupService.setStudyMemberRole(studyId, memberEmail, role, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(studyMemberId));
+    }
     // 스터디 그룹 신청
 
     // 스터디 그룹 신청 목록 조회

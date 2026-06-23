@@ -70,6 +70,8 @@ public class StudyGroupService {
         // 스터디 멤버에 저장
         studyMemberRepository.save(memberEntity);
 
+        log.info("스터디 그룹 생성");
+
         // 스터디id 반환
         return savedEntity.getStudyId();
     }
@@ -99,6 +101,7 @@ public class StudyGroupService {
         } else {
             studyGroups = studyGroupRepository.findAll();
         }
+        log.info("스터디 그룹 목록 조건 조회 요청");
         // Entity를 ResponseDto로 변환하며 List로 반환
         return studyGroups.stream()
                 .map(StudyGroupResponseDto::from)
@@ -120,6 +123,7 @@ public class StudyGroupService {
                         .nickName(member.getUserEntity().getNickname())
                         .build()
         ).toList();
+        log.info("{} 스터디 상세 조회 요청", studyId);
         return StudyGroupDetailResponseDto.from(studyGroupEntity, studyMembers);
     }
 
@@ -144,6 +148,7 @@ public class StudyGroupService {
         // 수정
         studyGroup.updatePartial(categoryEntity, request.getTitle(), request.getDescription(), request.getScope(), request.getJoinPolicy());
 
+        log.info("{}스터디 수정 요청 완료", studyId);
         // 스터디id 반환
         return studyGroup.getStudyId();
     }
@@ -219,11 +224,46 @@ public class StudyGroupService {
     // 자신이 속한 스터디 조회
     @Transactional
     public List<StudyGroupResponseDto> getMyStudyGroups(Long userId) {
+        log.info("{} 유저가 속한 스터디 그룹 조회 요청", userId);
         // Entity를 ResponseDto로 변환하며 List로 반환
         return studyMemberRepository.findByUserEntity_UserIdAndStatus(
                 userId,
                 StudyMemberStatus.STATUS_ACTIVE
         ).stream().map(StudyMemberEntity::getStudyGroupEntity).map(StudyGroupResponseDto::from).toList();
+    }
+
+    @Transactional
+    public Long setStudyMemberRole(Long studyId, String memberEmail, StudyMemberRole role, Long userId) {
+        // 자신의 권한 검증
+        validateStudyOwner(studyId, userId);
+
+        if (role == null) {
+            throw new IllegalArgumentException("변경할 역할은 필수입니다.");
+        }
+        // member 이메일 검증
+        UserEntity targetUserEntity = userRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
+
+        StudyMemberEntity targetEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                studyId,
+                targetUserEntity.getUserId(),
+                StudyMemberStatus.STATUS_ACTIVE
+        ).orElseThrow(()->new IllegalArgumentException("해당 스터디 그룹에 유효한 멤버가 없습니다."));
+
+        if(targetUserEntity.getUserId().equals(userId))
+            throw new IllegalArgumentException("자기 자신의 역할을 변경할 수 없습니다.");
+
+        if (targetEntity.getRole() == StudyMemberRole.ROLE_OWNER) {
+            throw new IllegalArgumentException("스터디 소유자의 역할은 변경할 수 없습니다.");
+        }
+
+        switch (role) {
+            case ROLE_MANAGER -> targetEntity.setRoleManager();
+            case ROLE_MEMBER -> targetEntity.setRoleMember();
+            default -> throw new IllegalArgumentException("해당 역할로는 변경이 불가능합니다.");
+        }
+
+        return targetEntity.getStudyMemberId();
     }
     ////////////////////////////////////////////////////////////////////////////////////
 
