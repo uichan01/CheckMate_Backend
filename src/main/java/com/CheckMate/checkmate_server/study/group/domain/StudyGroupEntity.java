@@ -3,6 +3,7 @@ package com.CheckMate.checkmate_server.study.group.domain;
 import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class StudyGroupEntity {
     public StudyGroupEntity(StudyCategoryEntity categoryEntity, String title, String description, GroupScope scope, GroupJoinPolicy joinPolicy) {
         this.categoryEntity = categoryEntity;
@@ -26,9 +28,6 @@ public class StudyGroupEntity {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="study_id")
     private Long studyId;
-
-//    @Column(name="category_id", nullable = false)
-//    private Long categoryId;
 
     @ManyToOne
     @JoinColumn(name ="category_id")
@@ -51,20 +50,4 @@ public class StudyGroupEntity {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    public static StudyGroupEntity create(
-            StudyCategoryEntity categoryEntity,
-            String title,
-            String description,
-            GroupScope scope,
-            GroupJoinPolicy joinPolicy
-    ) {
-        return new StudyGroupEntity(
-                categoryEntity,
-                title,
-                description,
-                scope,
-                joinPolicy
-        );
-    }
 }
