@@ -1,6 +1,7 @@
 package com.CheckMate.checkmate_server.security;
 
 import com.CheckMate.checkmate_server.security.jwt.JWTFilter;
+import com.CheckMate.checkmate_server.security.jwt.TokenBlacklistService;
 import com.CheckMate.checkmate_server.security.jwt.JWTUtil;
 import com.CheckMate.checkmate_server.security.jwt.LoginFilter;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -49,14 +51,14 @@ public class SecurityConfig {
         //경로별 인가
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/user/sign-up", "/", "/login","/h2-console/**",
-                                "/swagger-ui/**", "/v3/api-docs/**").permitAll() //모두 허용
+                        .requestMatchers("/user/sign-up", "/", "/login", "/h2-console/**",
+                                "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll() //모두 허용
                         .requestMatchers("/admin/**").hasRole("ADMIN") //admin 만
                         .anyRequest().authenticated()); //인증된 사용자만
 
         //jwt 필터
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil, tokenBlacklistService), LoginFilter.class);
         //로그인 필터
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
