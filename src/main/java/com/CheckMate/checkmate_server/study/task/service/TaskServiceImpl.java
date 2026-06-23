@@ -15,9 +15,14 @@ import com.CheckMate.checkmate_server.study.task.dto.res.TaskListResponse;
 import com.CheckMate.checkmate_server.study.task.dto.res.TaskSubmissionDetailResponse;
 import com.CheckMate.checkmate_server.study.task.dto.res.TaskSubmissionListResponse;
 
+import com.CheckMate.checkmate_server.study.task.ai.domain.TaskAiFeedbackEntity;
+import com.CheckMate.checkmate_server.study.task.ai.dto.AiFeedbackEvent;
+import com.CheckMate.checkmate_server.study.task.ai.dto.AiFeedbackMessage;
+import com.CheckMate.checkmate_server.study.task.ai.repository.TaskAiFeedbackRepository;
 import com.CheckMate.checkmate_server.study.task.repository.TaskRepository;
 import com.CheckMate.checkmate_server.study.task.repository.TaskSubmissionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +35,8 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final StudyMemberRepository studyMemberRepository;
     private final StudyGroupRepository studyGroupRepository;
+    private final TaskAiFeedbackRepository taskAiFeedbackRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -132,6 +139,20 @@ public class TaskServiceImpl implements TaskService {
                 .build();
 
         taskSubmissionRepository.save(taskSubmissionEntity);
+
+        TaskAiFeedbackEntity feedback = TaskAiFeedbackEntity.builder()
+                .taskSubmissionEntity(taskSubmissionEntity)
+                .build();
+        taskAiFeedbackRepository.save(feedback);
+
+        // 트랜잭션 커밋 후 Redis 발행 (DB 저장 완료 보장)
+        eventPublisher.publishEvent(new AiFeedbackEvent(this, new AiFeedbackMessage(
+                feedback.getId(),
+                taskEntity.getTitle(),
+                taskEntity.getContent(),
+                taskSubmitRequest.getTitle(),
+                taskSubmitRequest.getContent()
+        )));
     }
 
     @Override
