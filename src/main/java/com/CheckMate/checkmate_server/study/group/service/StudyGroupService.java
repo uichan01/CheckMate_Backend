@@ -9,6 +9,7 @@ import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequest
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
+import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupRequestResponseDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupResponseDto;
 import com.CheckMate.checkmate_server.study.group.repository.StudyGroupRepository;
 import com.CheckMate.checkmate_server.study.group.repository.StudyMemberRepository;
@@ -113,6 +114,17 @@ public class StudyGroupService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 스터디 그룹은 존재하지 않습니다."));
 
         // 비공개거나 공유 전용 페이지는 권한이 있어야 볼 수 있음
+        if(studyGroupEntity.getScope() == GroupScope.SCOPE_PRIVATE
+                || studyGroupEntity.getScope() == GroupScope.SCOPE_SHARED) {
+            if(!studyMemberRepository.existsByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                    studyId,
+                    userId,
+                    StudyMemberStatus.STATUS_ACTIVE
+            )) {
+                throw new IllegalArgumentException("스터디에 접근할 권한이 없습니다.");
+            }
+        }
+
         // 해당 스터디 그룹에 속한 멤버 목록 획득
         List<SimpleUserDto> studyMembers = studyMemberRepository.findByStudyGroupEntity_StudyIdAndStatus(
                 studyId, StudyMemberStatus.STATUS_ACTIVE)
@@ -121,14 +133,6 @@ public class StudyGroupService {
                         .nickName(member.getUserEntity().getNickname())
                         .build()
         ).toList();
-
-        if(studyGroupEntity.getScope() == GroupScope.SCOPE_PRIVATE
-            || studyGroupEntity.getScope() == GroupScope.SCOPE_SHARED) {
-
-            if(studyMembers.stream().noneMatch(simpleUserDto ->
-                    userId.equals(simpleUserDto.getUserId())))
-                throw new IllegalArgumentException("스터디에 접근할 권한이 없습니다.");
-        }
 
         log.info("{} 스터디 상세 조회 요청", studyId);
         return StudyGroupDetailResponseDto.from(studyGroupEntity, studyMembers);
@@ -159,7 +163,8 @@ public class StudyGroupService {
         // 스터디id 반환
         return studyGroup.getStudyId();
     }
-
+    
+    // 스터디 멤버 초대
     @Transactional
     public Long addStudyMember(Long studyId, String memberEmail, Long userId) {
         // 자신의 권한 확인(소유자, 관리자)
@@ -185,6 +190,7 @@ public class StudyGroupService {
         return entity.getStudyMemberId();
     }
 
+    // 스터디 멤버 제거
     @Transactional
     public Long removeStudyMember(Long studyId, String memberEmail, Long userId) {
         // 자신의 권한 확인(소유자, 관리자)
@@ -328,7 +334,78 @@ public class StudyGroupService {
         return studyMember.getStatus();
     }
 
+    // 스터디 신청 목록 조회
+    @Transactional
+    public List<StudyGroupRequestResponseDto> getStudyGroupRequestList(Long studyId, Long userId) {
+        studyGroupRepository.findById(studyId).orElseThrow(() -> new IllegalArgumentException(("존재하지 않는 스터디 그룹입니다.")));
 
+        StudyMemberEntity myStudyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                studyId,
+                userId,
+                StudyMemberStatus.STATUS_ACTIVE
+        ).orElseThrow(() -> new IllegalArgumentException("자신이 스터디에 속해있지 않습니다."));
+        if(myStudyMemberEntity.getRole() == StudyMemberRole.ROLE_MEMBER)
+            throw new IllegalArgumentException("권한이 없습니다.");
+
+        List<StudyGroupRequestResponseDto> studyMemberEntityList = studyMemberRepository.findByStudyGroupEntity_StudyIdAndStatus(
+                studyId,
+                StudyMemberStatus.STATUS_PENDING
+        ).stream().map(studyMemberEntity -> {
+            return StudyGroupRequestResponseDto.builder()
+                    .studyMemberId(studyMemberEntity.getStudyMemberId())
+                    .userId(studyMemberEntity.getUserEntity().getUserId())
+                    .requestDate(studyMemberEntity.getCreatedAt())
+                    .build();
+        }).toList();
+
+        return studyMemberEntityList;
+    }
+
+    // 가입 요청 승인
+    @Transactional
+    public void approveStudyGroupRequest(Long studyMemberId, Long userId) {
+        // 해당 번호를 가져오고, 스터디 그룹을 가져옴
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findById(studyMemberId).orElseThrow(() -> new IllegalArgumentException("유효하지 않은 번호입니다."));
+        StudyGroupEntity groupEntity = studyMemberEntity.getStudyGroupEntity();
+        //권한 확인
+        StudyMemberEntity myStudyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                groupEntity.getStudyId(),
+                userId,
+                StudyMemberStatus.STATUS_ACTIVE
+        ).orElseThrow(() -> new IllegalArgumentException("자신이 스터디에 속해있지 않습니다."));
+        if(myStudyMemberEntity.getRole() == StudyMemberRole.ROLE_MEMBER)
+            throw new IllegalArgumentException("권한이 없습니다.");
+
+        // 현재 상태가 PENDING인지 확인
+        if(studyMemberEntity.getStatus() != StudyMemberStatus.STATUS_PENDING)
+            throw new IllegalArgumentException("신청 상태가 아닙니다.");
+        // 승인
+        studyMemberEntity.active();
+    }
+
+    // 가입 요청 거절
+    @Transactional
+    public void rejectStudyGroupRequest(Long studyMemberId, Long userId) {
+        // 해당 번호를 가져오고, 스터디 그룹을 가져옴
+        StudyMemberEntity studyMemberEntity = studyMemberRepository.findById(studyMemberId).orElseThrow(() -> new IllegalArgumentException("유효하지 않은 번호입니다."));
+        StudyGroupEntity groupEntity = studyMemberEntity.getStudyGroupEntity();
+        //권한 확인
+        StudyMemberEntity myStudyMemberEntity = studyMemberRepository.findByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                groupEntity.getStudyId(),
+                userId,
+                StudyMemberStatus.STATUS_ACTIVE
+        ).orElseThrow(() -> new IllegalArgumentException("자신이 스터디에 속해있지 않습니다."));
+
+        if(myStudyMemberEntity.getRole() == StudyMemberRole.ROLE_MEMBER)
+            throw new IllegalArgumentException("권한이 없습니다.");
+
+        // 현재 상태가 PENDING인지 확인
+        if(studyMemberEntity.getStatus() != StudyMemberStatus.STATUS_PENDING)
+            throw new IllegalArgumentException("신청 상태가 아닙니다.");
+
+        // 거부 (물리 삭제)
+        studyMemberRepository.delete(studyMemberEntity);
+    }
     ////////////////////////////////////////////////////////////////////////////////////
 
     // 주어진 studyId에 대한 자신의 Owner 권한 확인

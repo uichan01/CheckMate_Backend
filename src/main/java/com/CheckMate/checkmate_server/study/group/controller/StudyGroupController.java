@@ -8,10 +8,12 @@ import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequest
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
+import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupRequestResponseDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupResponseDto;
 import com.CheckMate.checkmate_server.study.group.service.StudyGroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -94,9 +96,27 @@ public class StudyGroupController {
         return ResponseEntity.ok(ApiResponse.success(status));
     }
     // 스터디 그룹 신청 목록 조회
-
+    @GetMapping("/{studyId}/request")
+    public ResponseEntity<ApiResponse<List<StudyGroupRequestResponseDto>>> getStudyGroupRequestList(@PathVariable Long studyId,
+                                                                                              @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        List<StudyGroupRequestResponseDto> list = groupService.getStudyGroupRequestList(
+                studyId, customUserDetails.getUserId()
+        );
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
     // 스터디 신청 승인
-
+    @PostMapping("/{studyMemberId}/approval")
+    public ResponseEntity<ApiResponse<String>> approveStudyGroupRequest(@PathVariable Long studyMemberId,
+                                                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        groupService.approveStudyGroupRequest(studyMemberId, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success("성공"));
+    }
     // 스터디 신청 거절
+    @PostMapping("/{studyMemberId}/reject")
+    public ResponseEntity<ApiResponse<String>> rejectStudyGroupRequest(@PathVariable Long studyMemberId,
+                                                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        groupService.rejectStudyGroupRequest(studyMemberId, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success("성공"));
+    }
 
 }
