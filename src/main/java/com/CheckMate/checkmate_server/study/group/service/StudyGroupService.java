@@ -138,7 +138,7 @@ public class StudyGroupService {
         StudyGroupEntity entity = studyGroupRepository.findById(studyId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 스터디 그룹입니다."));
 
         // 수정
-        entity.
+
         StudyGroupEntity savedEntity = studyGroupRepository.save(entity);
 
 
