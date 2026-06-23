@@ -2,6 +2,7 @@ package com.CheckMate.checkmate_server.study.group.controller;
 
 import com.CheckMate.checkmate_server.response.ApiResponse;
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
+import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
@@ -38,28 +39,31 @@ public class StudyGroupController {
     }
 
     // 스터디 그룹 상세 조회
-    @GetMapping("/{study_id}")
+    @GetMapping("/{studyId}")
     public ResponseEntity<ApiResponse<StudyGroupDetailResponseDto>> getStudyGroupDetails(@PathVariable long studyId) {
         StudyGroupDetailResponseDto responseDto = groupService.getStudyGroupDetails(studyId);
         return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 
     // 스터디 그룹 수정
-    @PatchMapping("/{study_id}")
+    @PatchMapping("/{studyId}")
     public ResponseEntity<ApiResponse<Long>> updateStudyGroup(@PathVariable Long studyId,
-                                                              @Valid @RequestBody StudyGroupRequestDto request,
+                                                              @Valid @RequestBody StudyGroupPatchRequestDto request,
                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        long studyGroupId = groupService.updateStudyGroup(studyId, request, customUserDetails.getUsername());
+        long studyGroupId = groupService.updateStudyGroup(studyId, request, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(studyGroupId));
     }
     // 스터디 그룹 삭제(ON DELETE CASCADE, 이후에 작성)
 
     // 스터디 인원 추가
-
+    @PostMapping("/{studyId}/members")
+    public ResponseEntity<ApiResponse<Long>> addStudyMember(@PathVariable Long studyId, @RequestBody String email,
+                                                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long studyMemberId = groupService.addStudyMember(studyId, email, customUserDetails.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(studyMemberId));
+    }
 
     // 스터디 인원 삭제
-
-
 
     // 내가 속한 스터디 그룹 목록 조회
 

@@ -50,4 +50,39 @@ public class StudyGroupEntity {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    // put
+    public void update(
+            StudyCategoryEntity categoryEntity,
+            String title,
+            String description,
+            GroupScope scope,
+            GroupJoinPolicy joinPolicy
+    ) {
+        this.categoryEntity = categoryEntity;
+        this.title = title;
+        this.description = description;
+        this.scope = scope;
+        this.joinPolicy = joinPolicy;
+    }
+
+    // patch
+    public void updatePartial(
+            StudyCategoryEntity categoryEntity,
+            String title,
+            String description,
+            GroupScope scope,
+            GroupJoinPolicy joinPolicy
+    ) {
+        if(categoryEntity != null)
+            this.categoryEntity = categoryEntity;
+        if(title != null && !title.isBlank())
+            this.title = title;
+        if(description != null && !description.isBlank())
+            this.description = description;
+        if (scope != null)
+            this.scope = scope;
+        if (joinPolicy != null)
+            this.joinPolicy = joinPolicy;
+    }
 }

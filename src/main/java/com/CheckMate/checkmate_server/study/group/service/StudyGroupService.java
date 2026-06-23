@@ -8,6 +8,7 @@ import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
 import com.CheckMate.checkmate_server.study.group.domain.StudyMemberEntity;
 import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
 import com.CheckMate.checkmate_server.study.group.domain.StudyMemberStatus;
+import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
@@ -122,29 +123,81 @@ public class StudyGroupService {
 
     // 스터디 수정
     @Transactional
-    public Long updateStudyGroup(Long studyId, @NonNull StudyGroupRequestDto request, String myEmail) {
-        // 카테고리id를 받아서 엔티티 획득
-        Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
+    public Long updateStudyGroup(Long studyId, @NonNull StudyGroupPatchRequestDto request, Long userId) {
+        // 내 소유의 스터디 그룹인지 확인
+        validateStudyOwner(studyId, userId);
 
-        // 해당 엔티티가 없으면 예외 throw
-        StudyCategoryEntity categoryEntity = studyCategoryEntity
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+        StudyCategoryEntity categoryEntity = null;
+        if(request.getCategoryId() != null) {
+            // 카테고리id를 받아서 엔티티 획득
+            Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
 
-        // 자신의 이메일을 기반으로 userEntity를 찾고, 없으면 예외 throw
-        UserEntity userEntity = userRepository.findByEmail(myEmail).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
-
+            // 해당 엔티티가 없으면 예외 throw
+            categoryEntity = studyCategoryEntity
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+        }
         // studyId에 맞는 스터디 그룹을 찾고, 없으면 예외 Throw
-        StudyGroupEntity entity = studyGroupRepository.findById(studyId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 스터디 그룹입니다."));
+        StudyGroupEntity studyGroup = studyGroupRepository.findById(studyId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 스터디 그룹입니다."));
 
         // 수정
-
-        StudyGroupEntity savedEntity = studyGroupRepository.save(entity);
-
-
+        studyGroup.updatePartial(categoryEntity, request.getTitle(), request.getDescription(), request.getScope(), request.getJoinPolicy());
 
         // 스터디id 반환
-        return savedEntity.getStudyId();
+        return studyGroup.getStudyId();
     }
 
+    @Transactional
+    public Long addStudyMember(Long studyId, String memberEmail, Long userId) {
+        // 자신의 권한 확인(소유자, 관리자)
+        validateStudyOwnerOrManager(studyId, userId);
+
+        // 해당 member이메일이 존재하는지 검증
+        UserEntity userEntity = userRepository.findByEmail(memberEmail).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
+
+        // studyId에 맞는 스터디 그룹을 찾고, 없으면 예외 Throw
+        StudyGroupEntity studyGroup = studyGroupRepository.findById(studyId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 스터디 그룹입니다."));
+
+        StudyMemberEntity entity = StudyMemberEntity.builder()
+                .studyGroupEntity(studyGroup)
+                .userEntity(userEntity)
+                .role(StudyMemberRole.ROLE_MEMBER)
+                .status(StudyMemberStatus.STATUS_ACTIVE)
+                .build();
+        studyMemberRepository.save(entity);
+        return entity.getStudyMemberId();
+    }
+    ////////////////////////////////////////////////////////////////////////////////////
+
+    // 주어진 studyId에 대한 자신의 Owner 권한 확인
+    private StudyMemberEntity validateStudyOwner(Long studyId, Long userId) {
+        StudyMemberEntity studyMember = studyMemberRepository
+                .findByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                        studyId,
+                        userId,
+                        StudyMemberStatus.STATUS_ACTIVE
+                )
+                .orElseThrow(() -> new IllegalArgumentException("스터디 멤버가 아닙니다."));
+
+        if (studyMember.getRole() != StudyMemberRole.ROLE_OWNER) {
+            throw new IllegalArgumentException("권한이 부족합니다.");
+        }
+        return studyMember;
+    }
+
+    // 주어진 studyId에 대한 자신의 Owner 혹은 Manager 권한 확인
+    private StudyMemberEntity validateStudyOwnerOrManager(Long studyId, Long userId) {
+        StudyMemberEntity studyMember = studyMemberRepository
+                .findByStudyGroupEntity_StudyIdAndUserEntity_UserIdAndStatus(
+                        studyId,
+                        userId,
+                        StudyMemberStatus.STATUS_ACTIVE
+                )
+                .orElseThrow(() -> new IllegalArgumentException("스터디 멤버가 아닙니다."));
+
+        if (studyMember.getRole() != StudyMemberRole.ROLE_OWNER && studyMember.getRole() != StudyMemberRole.ROLE_MANAGER) {
+            throw new IllegalArgumentException("권한이 부족합니다.");
+        }
+        return studyMember;
+    }
 
 }
