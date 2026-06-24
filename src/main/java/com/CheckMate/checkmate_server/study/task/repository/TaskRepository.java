@@ -49,8 +49,10 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
             @Param("now") LocalDateTime now
     );
 
-    // 과제 수 반환
+    // 전체 과제 수 반환
     long countByStudyGroupEntity_StudyId(Long studyId);
+    
+    // 일정 기간의 과제 반환
     List<TaskEntity> findAllByStudyGroupEntity_StudyIdAndDueDateGreaterThanEqualAndDueDateLessThan(
             Long studyId,
             LocalDateTime startDateTime,

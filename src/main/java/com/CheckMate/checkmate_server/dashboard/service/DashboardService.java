@@ -62,9 +62,9 @@ public class DashboardService {
                 studyId,
                 StudyMemberStatus.STATUS_ACTIVE
         );
-
+        long remainTaskCnt =  taskRepository.countByStudyGroupEntity_StudyId(studyId);
         DashboardResponseDto responseDto = DashboardResponseDto.builder()
-                .remainTaskCnt(notSubmittedTasks.size())
+                .remainTaskCnt(remainTaskCnt)
                 .closeMeeting(
                         (meetingEntity != null) ? DashboardMeetingResponseDto.builder()
                         .meetingId(meetingEntity.getMeetingId())

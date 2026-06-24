@@ -10,8 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class DashboardResponseDto {
-    // 제출해야할 과제 수(남은 과제 수)
-    private int remainTaskCnt;
+    // 전체 과제 수
+    private long remainTaskCnt;
     // 가장 가까운 미팅
     private DashboardMeetingResponseDto closeMeeting;
     // 제출하지 않은 과제
