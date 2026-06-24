@@ -17,6 +17,7 @@ import com.CheckMate.checkmate_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +30,7 @@ public class DashboardService {
     private final MeetingRepository meetingRepository;
     private final StudyMemberRepository studyMemberRepository;
 
+    @Transactional
     public DashboardResponseDto getStudyGroupDashboardSummary(Long studyId, Long userId) {
         // 자신이 속한 스터디인지 우선 확인
         boolean isMember = studyMemberRepository
