@@ -71,9 +71,9 @@ public class StudyGroupController {
 
     // 스터디 인원 삭제
     @DeleteMapping("/{studyId}/members")
-    public ResponseEntity<ApiResponse<Long>> removeStudyMember(@PathVariable Long studyId, @Valid @RequestBody StudyMemberEmailRequestDto req,
+    public ResponseEntity<ApiResponse<Long>> removeStudyMember(@PathVariable Long studyId, @Valid @RequestBody Long memberId,
                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Long removeUserId = groupService.removeStudyMember(studyId, req.getEmail(), customUserDetails.getUserId());
+        Long removeUserId = groupService.removeStudyMember(studyId, memberId, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(removeUserId));
     }
     // 내가 속한 스터디 그룹 목록 조회
@@ -83,10 +83,10 @@ public class StudyGroupController {
         return ResponseEntity.ok(ApiResponse.success(list));
     }
     // 스터디원 역할 변경
-    @PatchMapping("{studyId}/member_role/{role}")
-    public ResponseEntity<ApiResponse<Long>> setStudyMemberRole(@PathVariable Long studyId, @Valid @RequestBody StudyMemberEmailRequestDto req, @PathVariable StudyMemberRole role,
+    @PatchMapping("/{studyId}/member_role/{role}")
+    public ResponseEntity<ApiResponse<Long>> setStudyMemberRole(@PathVariable Long studyId, @Valid @RequestBody Long memberId, @PathVariable StudyMemberRole role,
                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Long studyMemberId = groupService.setStudyMemberRole(studyId, req.getEmail(), role, customUserDetails.getUserId());
+        Long studyMemberId = groupService.setStudyMemberRole(studyId, memberId, role, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(studyMemberId));
     }
     // 스터디 그룹 신청
@@ -119,5 +119,7 @@ public class StudyGroupController {
         groupService.rejectStudyGroupRequest(studyMemberId, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success("성공"));
     }
+
+    // 스터디 역할 반환
 
 }

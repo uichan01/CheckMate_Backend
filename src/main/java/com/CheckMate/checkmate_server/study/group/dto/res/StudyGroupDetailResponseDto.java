@@ -2,6 +2,7 @@ package com.CheckMate.checkmate_server.study.group.dto.res;
 
 import com.CheckMate.checkmate_server.study.dto.SimpleUserDto;
 import com.CheckMate.checkmate_server.study.group.domain.StudyGroupEntity;
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,9 +18,9 @@ public class StudyGroupDetailResponseDto {
     private String description;
     private String categoryName;
     private LocalDateTime createdAt;
-    private List<SimpleUserDto> members;
+    private List<StudyMemberDto> members;
 
-    public static StudyGroupDetailResponseDto from(StudyGroupEntity groupEntity, List<SimpleUserDto> members) {
+    public static StudyGroupDetailResponseDto from(StudyGroupEntity groupEntity, List<StudyMemberDto> members) {
         return new StudyGroupDetailResponseDto(
                 groupEntity.getTitle(),
                 groupEntity.getDescription(),
