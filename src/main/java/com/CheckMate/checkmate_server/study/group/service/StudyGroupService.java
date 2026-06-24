@@ -67,7 +67,7 @@ public class StudyGroupService {
         // 스터디 멤버에 저장
         studyMemberRepository.save(memberEntity);
 
-        log.info("스터디 그룹 생성");
+        log.info("{} 스터디 그룹 생성", savedEntity.getStudyId());
 
         // 스터디id 반환
         return savedEntity.getStudyId();
@@ -163,9 +163,11 @@ public class StudyGroupService {
     // 스터디 멤버 초대
     @Transactional
     public Long addStudyMember(Long studyId, String memberEmail, Long userId) {
+        memberEmail = memberEmail.trim();
+
         // 자신의 권한 확인(소유자, 관리자)
         validateStudyOwnerOrManager(studyId, userId);
-
+        log.info("{} 유저 초대 시작", memberEmail);
         // 해당 member이메일이 존재하는지 검증
         UserEntity userEntity = userRepository.findByEmail(memberEmail).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
 
@@ -189,6 +191,7 @@ public class StudyGroupService {
     // 스터디 멤버 제거
     @Transactional
     public Long removeStudyMember(Long studyId, String memberEmail, Long userId) {
+        memberEmail = memberEmail.trim();
         // 자신의 권한 확인(소유자, 관리자)
         StudyMemberEntity studyMemberEntity = validateStudyOwnerOrManager(studyId, userId);
 
@@ -244,6 +247,7 @@ public class StudyGroupService {
     // 스터디 역할 변경
     @Transactional
     public Long setStudyMemberRole(Long studyId, String memberEmail, StudyMemberRole role, Long userId) {
+        memberEmail = memberEmail.trim();
         // 자신의 권한 검증
         validateStudyOwner(studyId, userId);
 
@@ -428,7 +432,7 @@ public class StudyGroupService {
                         userId,
                         StudyMemberStatus.STATUS_ACTIVE
                 )
-                .orElseThrow(() -> new IllegalArgumentException("스터디 멤버가 아닙니다."));
+                .orElseThrow(() -> new IllegalArgumentException(userId + "는 " + studyId + "스터디 멤버가 아닙니다."));
 
         if (studyMember.getRole() != StudyMemberRole.ROLE_OWNER && studyMember.getRole() != StudyMemberRole.ROLE_MANAGER) {
             throw new IllegalArgumentException("권한이 부족합니다.");
