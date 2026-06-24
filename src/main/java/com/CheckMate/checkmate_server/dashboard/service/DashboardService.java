@@ -39,7 +39,7 @@ public class DashboardService {
                 );
 
         if (!isMember) {
-            throw new IllegalStateException("자신이 속한 스터디 그룹이 아닙니다.");
+            throw new IllegalArgumentException("자신이 속한 스터디 그룹이 아닙니다.");
         }
 
         LocalDateTime now = LocalDateTime.now();

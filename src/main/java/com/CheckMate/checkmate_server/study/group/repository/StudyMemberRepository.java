@@ -36,7 +36,7 @@ public interface StudyMemberRepository extends JpaRepository<StudyMemberEntity, 
 
     // 각 유저 별 제출 수 반환
     @Query("""
-    select new com.CheckMate.checkmate_server.dashboard.dto.query.DashboardUserSubmissionCountDto(
+    select new com.CheckMate.checkmate_server.dashboard.dto.res.DashboardUserResponseDto(
         sm.userEntity.userId,
         sm.userEntity.nickname,
         count(distinct ts.taskEntity.taskId)
