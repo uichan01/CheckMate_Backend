@@ -3,13 +3,13 @@ package com.CheckMate.checkmate_server.study.task.ai.outbox.service;
 import com.CheckMate.checkmate_server.study.task.ai.dto.AiFeedbackMessage;
 import com.CheckMate.checkmate_server.study.task.ai.outbox.domain.AiFeedbackOutboxEntity;
 import com.CheckMate.checkmate_server.study.task.ai.outbox.repository.AiFeedbackOutboxRepository;
-import com.CheckMate.checkmate_server.study.task.ai.domain.TaskAiFeedbackEntity;
 import com.CheckMate.checkmate_server.study.task.ai.repository.TaskAiFeedbackRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -29,10 +29,11 @@ public class AiFeedbackOutboxService {
     }
 
     @Transactional
-    public void enqueueRetry(AiFeedbackMessage message) {
-        TaskAiFeedbackEntity feedback = feedbackRepository.findById(message.getFeedbackId())
-                .orElseThrow(() -> new IllegalArgumentException("AI feedback not found"));
-        feedback.markPendingForRetry();
+    public boolean enqueueRetry(AiFeedbackMessage message, String processingToken) {
+        if (feedbackRepository.releaseForRetry(message.getFeedbackId(), processingToken, LocalDateTime.now()) == 0) {
+            return false;
+        }
         enqueue(message);
+        return true;
     }
 }

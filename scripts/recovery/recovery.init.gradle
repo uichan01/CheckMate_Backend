@@ -1,0 +1,19 @@
+allprojects {
+    plugins.withId('java') {
+        sourceSets {
+            recovery {
+                java.srcDir 'src/recovery/java'
+                compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+                runtimeClasspath += output + compileClasspath
+            }
+        }
+        tasks.register('writeRecoveryClasspath') {
+            dependsOn tasks.named('recoveryClasses')
+            doLast {
+                def target = layout.buildDirectory.file('recovery/classpath.txt').get().asFile
+                target.parentFile.mkdirs()
+                target.text = sourceSets.recovery.runtimeClasspath.asPath
+            }
+        }
+    }
+}

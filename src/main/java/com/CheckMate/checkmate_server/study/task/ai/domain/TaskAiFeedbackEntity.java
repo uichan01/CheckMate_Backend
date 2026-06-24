@@ -50,6 +50,15 @@ public class TaskAiFeedbackEntity {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name = "processing_token", length = 36)
+    private String processingToken;
+
+    @Column(name = "lease_until")
+    private LocalDateTime leaseUntil;
+
+    @Column(name = "processing_attempts", nullable = false, columnDefinition = "integer default 0")
+    private int processingAttempts;
+
     @Builder
     public TaskAiFeedbackEntity(TaskSubmissionEntity taskSubmissionEntity) {
         this.taskSubmissionEntity = taskSubmissionEntity;
@@ -80,6 +89,8 @@ public class TaskAiFeedbackEntity {
         this.errorMessage = null;
         this.startedAt = null;
         this.completedAt = null;
+        this.processingToken = null;
+        this.leaseUntil = null;
     }
 
     public void cleanUp(){
@@ -90,5 +101,8 @@ public class TaskAiFeedbackEntity {
         this.errorMessage = null;
         this.startedAt = null;
         this.completedAt = null;
+        this.processingToken = null;
+        this.leaseUntil = null;
+        this.processingAttempts = 0;
     }
 }

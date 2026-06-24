@@ -2,7 +2,6 @@ package com.CheckMate.checkmate_server.study.task.ai.service;
 
 import com.CheckMate.checkmate_server._common.service.S3FileUploadService;
 import com.CheckMate.checkmate_server.study.task.ai.domain.AiFeedbackStatus;
-import com.CheckMate.checkmate_server.study.task.ai.domain.TaskAiFeedbackEntity;
 import com.CheckMate.checkmate_server.study.task.ai.dto.AiFeedbackMessage;
 import com.CheckMate.checkmate_server.study.task.ai.dto.AiFeedbackResult;
 import com.CheckMate.checkmate_server.study.task.ai.repository.TaskAiFeedbackRepository;
@@ -15,6 +14,9 @@ import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisSystemException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Range;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -29,8 +31,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -50,13 +56,25 @@ public class AiFeedbackConsumer {
     private final AiService aiService;
     private final AiFeedbackOutboxService outboxService;
     private final ExecutorService consumers = Executors.newFixedThreadPool(2);
+    private final ScheduledExecutorService heartbeats = Executors.newScheduledThreadPool(2);
+    private final String instanceId = UUID.randomUUID().toString();
+
+    @Value("${ai.feedback.recovery.idle-ms:180000}")
+    private long recoveryIdleMs = 180_000;
+    @Value("${ai.feedback.recovery.lease-ms:180000}")
+    private long leaseMs = 180_000;
+    @Value("${ai.feedback.recovery.heartbeat-ms:30000}")
+    private long heartbeatMs = 30_000;
     private volatile boolean running = true;
 
     @PostConstruct
     public void subscribe() {
+        if (recoveryIdleMs <= 0 || heartbeatMs <= 0 || leaseMs < heartbeatMs * 3) {
+            throw new IllegalArgumentException("Recovery idle must be positive; lease must be at least 3 heartbeat intervals");
+        }
         createConsumerGroup();
-        consumers.submit(() -> consume("consumer-1"));
-        consumers.submit(() -> consume("consumer-2"));
+        consumers.submit(() -> consume(instanceId + "-1"));
+        consumers.submit(() -> consume(instanceId + "-2"));
         log.info("AI feedback consumers started stream={} group={}", AiFeedbackProducer.STREAM_KEY, GROUP);
     }
 
@@ -64,22 +82,32 @@ public class AiFeedbackConsumer {
     public void shutdown() {
         running = false;
         consumers.shutdownNow();
+        heartbeats.shutdownNow();
     }
 
     private void createConsumerGroup() {
         try {
-            redisTemplate.opsForStream().createGroup(
-                    AiFeedbackProducer.STREAM_KEY, ReadOffset.from("0-0"), GROUP);
+            redisTemplate.execute((RedisCallback<String>) connection -> connection.streamCommands().xGroupCreate(
+                    AiFeedbackProducer.STREAM_KEY.getBytes(StandardCharsets.UTF_8), GROUP, ReadOffset.from("0-0"), true));
         } catch (RedisSystemException e) {
-            if (e.getMessage() == null || !e.getMessage().contains("BUSYGROUP")) {
+            if (!isExistingGroup(e)) {
                 throw e;
             }
         }
     }
 
+    static boolean isExistingGroup(Throwable error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause.getMessage() != null && cause.getMessage().startsWith("BUSYGROUP ")) return true;
+            if (cause.getCause() == cause) break;
+        }
+        return false;
+    }
+
     private void consume(String consumerName) {
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
+                recoverPending(consumerName);
                 List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(
                         Consumer.from(GROUP, consumerName),
                         StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)),
@@ -90,8 +118,28 @@ public class AiFeedbackConsumer {
             } catch (Exception e) {
                 if (running) {
                     log.error("AI feedback stream consumption failed consumer={}", consumerName, e);
+                    try {
+                        Thread.sleep(1_000);
+                    } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
+        }
+    }
+
+    private void recoverPending(String consumerName) {
+        // XPENDING IDLE + XCLAIM re-checks idle time atomically when ownership is transferred.
+        // Claim one record just before processing, rather than leasing a large waiting batch.
+        Duration minIdle = Duration.ofMillis(recoveryIdleMs);
+        var pending = redisTemplate.opsForStream().pending(
+                AiFeedbackProducer.STREAM_KEY, GROUP, Range.unbounded(), 10, minIdle);
+        if (pending == null) return;
+        for (var entry : pending) {
+            if (!running || Thread.currentThread().isInterrupted()) return;
+            List<MapRecord<String, Object, Object>> claimed = redisTemplate.opsForStream().claim(
+                    AiFeedbackProducer.STREAM_KEY, GROUP, consumerName, minIdle, entry.getId());
+            if (claimed != null) claimed.forEach(this::process);
         }
     }
 
@@ -106,35 +154,62 @@ public class AiFeedbackConsumer {
             return;
         }
 
-        int claimed = feedbackRepository.claimPending(message.getFeedbackId(), LocalDateTime.now());
+        String token = UUID.randomUUID().toString();
+        LocalDateTime now = LocalDateTime.now();
+        int claimed = feedbackRepository.claimAvailable(message.getFeedbackId(), token, now,
+                now.plus(Duration.ofMillis(leaseMs)), now.minus(Duration.ofMillis(leaseMs)), MAX_RETRY_COUNT + 1);
         if (claimed == 0) {
-            acknowledge(record.getId());
+            feedbackRepository.failExhausted(message.getFeedbackId(), now,
+                    now.minus(Duration.ofMillis(leaseMs)), MAX_RETRY_COUNT + 1);
+            acknowledgeIfTerminal(message.getFeedbackId(), record.getId());
             return;
         }
 
-        TaskAiFeedbackEntity feedback = feedbackRepository.findById(message.getFeedbackId())
-                .orElseThrow(() -> new IllegalStateException("Claimed AI feedback not found"));
-
+        var heartbeat = heartbeats.scheduleAtFixedRate(() -> renewLease(message.getFeedbackId(), token),
+                heartbeatMs, heartbeatMs, TimeUnit.MILLISECONDS);
         try {
-            AiFeedbackResult result = aiService.generateFeedback(
-                    message.getTaskTitle(), message.getTaskContent(),
-                    message.getSubmissionTitle(), message.getSubmissionContent(),
-                    message.getAttachmentUrls(), buildAttachmentText(message.getSubmissionId()));
-            feedback.markCompleted(result.getStrength(), result.getWeakness(), result.getSuggestion());
-            feedbackRepository.save(feedback);
-            acknowledge(record.getId());
-            log.info("AI feedback completed feedbackId={}", message.getFeedbackId());
-        } catch (Exception e) {
-            log.error("AI feedback failed feedbackId={} retryCount={}",
-                    message.getFeedbackId(), message.getRetryCount(), e);
-            if (message.getRetryCount() < MAX_RETRY_COUNT) {
-                outboxService.enqueueRetry(message.nextRetry());
-            } else {
-                feedback.markFailed(e.getMessage());
-                feedbackRepository.save(feedback);
+            AiFeedbackResult result;
+            try {
+                result = aiService.generateFeedback(
+                        message.getTaskTitle(), message.getTaskContent(),
+                        message.getSubmissionTitle(), message.getSubmissionContent(),
+                        message.getAttachmentUrls(), buildAttachmentText(message.getSubmissionId()));
+            } catch (Exception e) {
+                log.error("AI feedback failed feedbackId={} retryCount={}",
+                        message.getFeedbackId(), message.getRetryCount(), e);
+                boolean persisted = message.getRetryCount() < MAX_RETRY_COUNT
+                        ? outboxService.enqueueRetry(message.nextRetry(), token)
+                        : feedbackRepository.failOwned(message.getFeedbackId(), token, LocalDateTime.now(), e.getMessage()) == 1;
+                if (persisted) acknowledge(record.getId());
+                return;
             }
-            acknowledge(record.getId());
+            // Persistence/ACK failures leave the message pending; they are not AI-call failures.
+            if (feedbackRepository.completeOwned(message.getFeedbackId(), token, LocalDateTime.now(),
+                    result.getStrength(), result.getWeakness(), result.getSuggestion()) == 1) {
+                acknowledge(record.getId());
+                log.info("AI feedback completed feedbackId={}", message.getFeedbackId());
+            }
+        } finally {
+            heartbeat.cancel(false);
         }
+    }
+
+    private void renewLease(Long feedbackId, String token) {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            feedbackRepository.renewLease(feedbackId, token, now, now.plus(Duration.ofMillis(leaseMs)));
+        } catch (Exception e) {
+            log.warn("AI feedback lease renewal failed feedbackId={}", feedbackId, e);
+        }
+    }
+
+    private void acknowledgeIfTerminal(Long feedbackId, RecordId recordId) {
+        var feedback = feedbackRepository.findById(feedbackId);
+        if (feedback.isEmpty() || feedback.get().getStatus() == AiFeedbackStatus.COMPLETED
+                || feedback.get().getStatus() == AiFeedbackStatus.FAILED) {
+            acknowledge(recordId);
+        }
+        // An active PROCESSING job must retain its pending message for crash recovery.
     }
 
     private void acknowledge(RecordId recordId) {

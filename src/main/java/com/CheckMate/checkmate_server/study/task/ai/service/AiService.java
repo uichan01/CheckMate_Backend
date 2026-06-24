@@ -6,12 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.net.http.HttpClient;
+import java.time.Duration;
 
 @Slf4j
 @Service
@@ -35,7 +38,11 @@ public class AiService {
             @Value("${openai.api-key}") String apiKey,
             @Value("${openai.model:gpt-4o-mini}") String model) {
         this.model = model;
+        var requestFactory = new JdkClientHttpRequestFactory(HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10)).build());
+        requestFactory.setReadTimeout(Duration.ofSeconds(120));
         this.restClient = RestClient.builder()
+                .requestFactory(requestFactory)
                 .baseUrl("https://gms.ssafy.io/gmsapi/api.openai.com/v1")
                 .defaultHeader("Authorization", "Bearer " + apiKey)
                 .build();
