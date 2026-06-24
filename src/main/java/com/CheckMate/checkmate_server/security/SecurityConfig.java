@@ -1,9 +1,9 @@
 package com.CheckMate.checkmate_server.security;
 
 import com.CheckMate.checkmate_server.security.jwt.JWTFilter;
-import com.CheckMate.checkmate_server.security.jwt.TokenBlacklistService;
 import com.CheckMate.checkmate_server.security.jwt.JWTUtil;
 import com.CheckMate.checkmate_server.security.jwt.LoginFilter;
+import com.CheckMate.checkmate_server.security.jwt.TokenBlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,43 +27,43 @@ public class SecurityConfig {
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
         return configuration.getAuthenticationManager();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf((auth) -> auth.disable());
+        http.formLogin((auth) -> auth.disable());
+        http.httpBasic((auth) -> auth.disable());
 
-        //비활성화
-        http.csrf((auth)->auth.disable());
-        http.formLogin((auth)->auth.disable());
-        http.httpBasic((auth)->auth.disable());
-
-        // H2 콘솔 iframe 허용
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
-        //경로별 인가
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/user/sign-up", "/", "/login", "/h2-console/**",
-                                "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll() //모두 허용
-                        .requestMatchers("/admin/**").hasRole("ADMIN") //admin 만
-                        .anyRequest().authenticated()); //인증된 사용자만
+                        .requestMatchers(
+                                "/",
+                                "/api/v1/user/auth/sign-up",
+                                "/api/v1/user/auth/check-email",
+                                "/api/v1/user/auth/login",
+                                "/h2-console/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated());
 
-        //jwt 필터
         http
                 .addFilterBefore(new JWTFilter(jwtUtil, tokenBlacklistService), LoginFilter.class);
-        //로그인 필터
+
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
-        //세션 stateless 로
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
