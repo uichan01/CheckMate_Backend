@@ -7,6 +7,7 @@ import com.CheckMate.checkmate_server.study.group.domain.StudyMemberStatus;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupPatchRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.req.StudyGroupSearchRequest;
+import com.CheckMate.checkmate_server.study.group.dto.req.StudyMemberEmailRequestDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupDetailResponseDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupRequestResponseDto;
 import com.CheckMate.checkmate_server.study.group.dto.res.StudyGroupResponseDto;
@@ -62,17 +63,17 @@ public class StudyGroupController {
 
     // 스터디 인원 추가
     @PostMapping("/{studyId}/members")
-    public ResponseEntity<ApiResponse<Long>> addStudyMember(@PathVariable Long studyId, @RequestBody String email,
+    public ResponseEntity<ApiResponse<Long>> addStudyMember(@PathVariable Long studyId, @Valid @RequestBody StudyMemberEmailRequestDto req,
                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Long studyMemberId = groupService.addStudyMember(studyId, email, customUserDetails.getUserId());
+        Long studyMemberId = groupService.addStudyMember(studyId, req.getEmail(), customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(studyMemberId));
     }
 
     // 스터디 인원 삭제
     @DeleteMapping("/{studyId}/members")
-    public ResponseEntity<ApiResponse<Long>> removeStudyMember(@PathVariable Long studyId, @RequestBody String email,
+    public ResponseEntity<ApiResponse<Long>> removeStudyMember(@PathVariable Long studyId, @Valid @RequestBody StudyMemberEmailRequestDto req,
                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Long removeUserId = groupService.removeStudyMember(studyId, email, customUserDetails.getUserId());
+        Long removeUserId = groupService.removeStudyMember(studyId, req.getEmail(), customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(removeUserId));
     }
     // 내가 속한 스터디 그룹 목록 조회
@@ -83,9 +84,9 @@ public class StudyGroupController {
     }
     // 스터디원 역할 변경
     @PatchMapping("{studyId}/member_role/{role}")
-    public ResponseEntity<ApiResponse<Long>> setStudyMemberRole(@PathVariable Long studyId, @RequestBody String memberEmail, @PathVariable StudyMemberRole role,
+    public ResponseEntity<ApiResponse<Long>> setStudyMemberRole(@PathVariable Long studyId, @Valid @RequestBody StudyMemberEmailRequestDto req, @PathVariable StudyMemberRole role,
                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        Long studyMemberId = groupService.setStudyMemberRole(studyId, memberEmail, role, customUserDetails.getUserId());
+        Long studyMemberId = groupService.setStudyMemberRole(studyId, req.getEmail(), role, customUserDetails.getUserId());
         return ResponseEntity.ok(ApiResponse.success(studyMemberId));
     }
     // 스터디 그룹 신청

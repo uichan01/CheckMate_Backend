@@ -7,12 +7,14 @@ import com.CheckMate.checkmate_server.user.auth.dto.req.SignUpRequestDto;
 import com.CheckMate.checkmate_server.user.auth.dto.res.SignUpResponseDto;
 import com.CheckMate.checkmate_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserAuthServiceImpl implements UserAuthService {
 
     private static final Long TOKEN_EXPIRE_MS = 60 * 60 * 1000L;
@@ -47,6 +49,8 @@ public class UserAuthServiceImpl implements UserAuthService {
                 UserRole.ROLE_USER.name(),
                 TOKEN_EXPIRE_MS
         );
+        log.info("{} id로 가입 성공, 이메일: {}", savedUser.getUserId(), savedUser.getEmail());
+
 
         return SignUpResponseDto.builder()
                 .userId(savedUser.getUserId())
@@ -55,6 +59,8 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .role(savedUser.getRole().name())
                 .token(token)
                 .build();
+
+
     }
 
     @Override
