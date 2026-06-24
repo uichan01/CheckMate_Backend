@@ -19,14 +19,13 @@ import com.CheckMate.checkmate_server.study.task.dto.res.TaskSubmissionDetailRes
 import com.CheckMate.checkmate_server.study.task.dto.res.TaskSubmissionListResponse;
 
 import com.CheckMate.checkmate_server.study.task.ai.domain.TaskAiFeedbackEntity;
-import com.CheckMate.checkmate_server.study.task.ai.dto.AiFeedbackEvent;
 import com.CheckMate.checkmate_server.study.task.ai.dto.AiFeedbackMessage;
+import com.CheckMate.checkmate_server.study.task.ai.outbox.service.AiFeedbackOutboxService;
 import com.CheckMate.checkmate_server.study.task.ai.repository.TaskAiFeedbackRepository;
 import com.CheckMate.checkmate_server.study.task.repository.TaskSubmissionAttachmentRepository;
 import com.CheckMate.checkmate_server.study.task.repository.TaskRepository;
 import com.CheckMate.checkmate_server.study.task.repository.TaskSubmissionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,7 +42,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskAiFeedbackRepository taskAiFeedbackRepository;
     private final TaskSubmissionAttachmentRepository taskSubmissionAttachmentRepository;
     private final S3FileUploadService s3FileUploadService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final AiFeedbackOutboxService aiFeedbackOutboxService;
 
     @Override
     @Transactional
@@ -156,7 +155,7 @@ public class TaskServiceImpl implements TaskService {
                 .build();
         taskAiFeedbackRepository.save(feedback);
 
-        eventPublisher.publishEvent(new AiFeedbackEvent(this, new AiFeedbackMessage(
+        aiFeedbackOutboxService.enqueue(new AiFeedbackMessage(
                 feedback.getId(),
                 taskSubmissionEntity.getSubmissionId(),
                 taskEntity.getTitle(),
@@ -164,7 +163,7 @@ public class TaskServiceImpl implements TaskService {
                 taskSubmitRequest.getTitle(),
                 taskSubmitRequest.getContent(),
                 getSubmissionAttachmentUrls(taskSubmissionEntity.getSubmissionId())
-        )));
+        ));
     }
 
     @Override
@@ -180,7 +179,7 @@ public class TaskServiceImpl implements TaskService {
         TaskAiFeedbackEntity taskAiFeedbackEntity = taskAiFeedbackRepository.findByTaskSubmissionEntity_SubmissionId(submitId)
                 .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 상태입니다."));
         taskAiFeedbackEntity.cleanUp();
-        eventPublisher.publishEvent(new AiFeedbackEvent(this, new AiFeedbackMessage(
+        aiFeedbackOutboxService.enqueue(new AiFeedbackMessage(
                 taskAiFeedbackEntity.getId(),
                 taskSubmissionEntity.getSubmissionId(),
                 taskSubmissionEntity.getTaskEntity().getTitle(),
@@ -188,7 +187,7 @@ public class TaskServiceImpl implements TaskService {
                 taskSubmitRequest.getTitle(),
                 taskSubmitRequest.getContent(),
                 getSubmissionAttachmentUrls(taskSubmissionEntity.getSubmissionId())
-        )));
+        ));
     }
 
     @Override

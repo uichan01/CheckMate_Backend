@@ -75,6 +75,13 @@ public class TaskAiFeedbackEntity {
         this.completedAt = LocalDateTime.now();
     }
 
+    public void markPendingForRetry() {
+        this.status = AiFeedbackStatus.PENDING;
+        this.errorMessage = null;
+        this.startedAt = null;
+        this.completedAt = null;
+    }
+
     public void cleanUp(){
         this.status = AiFeedbackStatus.PENDING;
         this.strength = null;
