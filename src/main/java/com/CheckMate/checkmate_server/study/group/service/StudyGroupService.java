@@ -2,6 +2,7 @@ package com.CheckMate.checkmate_server.study.group.service;
 
 import com.CheckMate.checkmate_server.security.dto.CustomUserDetails;
 import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
+import com.CheckMate.checkmate_server.study.category.repository.StudyCategoryRepository;
 import com.CheckMate.checkmate_server.study.category.service.StudyCategoryService;
 import com.CheckMate.checkmate_server.study.dto.SimpleUserDto;
 import com.CheckMate.checkmate_server.study.group.domain.*;
@@ -34,16 +35,14 @@ public class StudyGroupService {
     private final StudyMemberRepository studyMemberRepository;
     private final StudyCategoryService studyCategoryService;
     private final UserRepository userRepository;
+    private final StudyCategoryRepository categoryRepository;
 
     // 스터디 그룹 생성
     @Transactional
     public Long createStudyGroup(@NonNull StudyGroupRequestDto request, Long userId) {
         // 카테고리id를 받아서 엔티티 획득
-        Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
-
-        // 해당 엔티티가 없으면 예외 throw
-        StudyCategoryEntity categoryEntity = studyCategoryEntity
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+        StudyCategoryEntity categoryEntity = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("유효한 카테고가 없습니다."));
 
         // 스터디 그룹 엔티티 생성
         StudyGroupEntity entity = StudyGroupEntity.builder()
@@ -147,11 +146,8 @@ public class StudyGroupService {
         StudyCategoryEntity categoryEntity = null;
         if(request.getCategoryId() != null) {
             // 카테고리id를 받아서 엔티티 획득
-            Optional<StudyCategoryEntity> studyCategoryEntity = studyCategoryService.getStudyCategoryEntity(request.getCategoryId());
-
-            // 해당 엔티티가 없으면 예외 throw
-            categoryEntity = studyCategoryEntity
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+            categoryEntity = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("유효한 카테고가 없습니다."));
         }
         // studyId에 맞는 스터디 그룹을 찾고, 없으면 예외 Throw
         StudyGroupEntity studyGroup = studyGroupRepository.findById(studyId).orElseThrow(()-> new IllegalArgumentException("존재하지 않는 스터디 그룹입니다."));
