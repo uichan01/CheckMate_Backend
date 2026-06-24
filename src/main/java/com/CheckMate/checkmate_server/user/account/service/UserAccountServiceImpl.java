@@ -36,6 +36,7 @@ public class UserAccountServiceImpl implements UserAccountService {
                 .toList();
 
         return MyInfoResponseDto.builder()
+                .email(user.getEmail())
                 .userId(user.getUserId())
                 .nickname(user.getNickname())
                 .intro(user.getIntro())
