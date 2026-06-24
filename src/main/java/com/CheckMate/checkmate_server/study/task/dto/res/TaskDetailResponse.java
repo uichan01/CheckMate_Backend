@@ -13,6 +13,7 @@ public class TaskDetailResponse {
     private Long taskId;
     private String title;
     private String content;
+    private Long writerId;
     private LocalDateTime dueDate;
     private LocalDateTime createdAt;
 
@@ -21,6 +22,7 @@ public class TaskDetailResponse {
                 .taskId(taskEntity.getTaskId())
                 .title(taskEntity.getTitle())
                 .content(taskEntity.getContent())
+                .writerId(taskEntity.getUserEntity().getUserId())
                 .dueDate(taskEntity.getDueDate())
                 .createdAt(taskEntity.getCreatedAt())
                 .build();
