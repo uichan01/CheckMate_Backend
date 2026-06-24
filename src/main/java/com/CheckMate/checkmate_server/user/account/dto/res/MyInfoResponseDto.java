@@ -10,6 +10,7 @@ import java.util.List;
 public class MyInfoResponseDto {
 
     private long userId;
+    private String email;
     private String nickname;
     private String intro;
     private String role;
