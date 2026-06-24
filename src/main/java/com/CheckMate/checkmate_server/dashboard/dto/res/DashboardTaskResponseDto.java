@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 @Builder
@@ -12,6 +14,6 @@ public class DashboardTaskResponseDto {
     private Long taskId;
     // 과제 제목
     private String title;
-    // 작성자명
-    private String nickname;
+    // 기한
+    private LocalDateTime dueDate;
 }

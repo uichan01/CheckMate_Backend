@@ -12,6 +12,6 @@ public class DashboardUserResponseDto {
     private Long userId;
     // 닉네임
     private String nickname;
-    // 참여율
-    private float participationRate;
+    // 제출 수
+    private long submittedTaskCount;
 }

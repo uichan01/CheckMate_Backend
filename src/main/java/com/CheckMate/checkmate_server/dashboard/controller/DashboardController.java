@@ -10,14 +10,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.CheckMate.checkmate_server.dashboard.service.DashboardService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/dashboard")
 public class DashboardController {
-    @GetMapping("summary/{studyId}")
+    private final DashboardService dashboardService;
+
+    @GetMapping("/summary/{studyId}")
     public ResponseEntity<ApiResponse<DashboardResponseDto>> getStudyGroupDashboardSummary(@PathVariable Long studyId,
                                                                                            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        return ResponseEntity.ok(ApiResponse.success(null));
+        DashboardResponseDto responseDto = dashboardService.getStudyGroupDashboardSummary(
+                studyId,
+                customUserDetails.getUserId()
+        );
+        return ResponseEntity.ok(ApiResponse.success(responseDto));
     }
 }
