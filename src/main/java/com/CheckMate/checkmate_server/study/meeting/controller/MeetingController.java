@@ -12,78 +12,95 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/study/meeting")
+@RequestMapping("/api/v1/study/meeting")
 public class MeetingController {
 
     private final MeetingService meetingService;
 
-    //미팅 추가
     @PostMapping
-    public ResponseEntity<ApiResponse<Long>> createMeeting(@Valid @RequestBody CreateMeetingRequestDto createMeetingRequestDto,
-                                                           @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<ApiResponse<Long>> createMeeting(
+            @Valid @RequestBody CreateMeetingRequestDto createMeetingRequestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
         long meetingId = meetingService.createMeeting(createMeetingRequestDto, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(meetingId));
     }
-    //미팅 수정
+
     @PatchMapping
-    public ResponseEntity<ApiResponse<Long>> updateMeeting(@Valid @RequestBody UpdateMeetingRequestDto updateMeetingRequestDto,
-                                                          @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<ApiResponse<Long>> updateMeeting(
+            @Valid @RequestBody UpdateMeetingRequestDto updateMeetingRequestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
         long meetingId = meetingService.updateMeeting(updateMeetingRequestDto, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingId));
     }
-    //미팅 삭제
-    @DeleteMapping("/{meeting_id}")
-    public ResponseEntity<ApiResponse<Long>> deleteMeeting(@RequestParam("meeting_id") long meetingId,
-                                                           @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+    @DeleteMapping("/{meetingId}")
+    public ResponseEntity<ApiResponse<Long>> deleteMeeting(
+            @PathVariable long meetingId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
         meetingService.deleteMeeting(meetingId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingId));
     }
-    //미팅 목록 조회
-    @GetMapping("/list/{study_id}")
-    public ResponseEntity<ApiResponse<List<MeetingListResponseDto>>> getMeetingList(@RequestParam("study_id") long studyId,
-                                                                                    @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+    @GetMapping("/list/{studyId}")
+    public ResponseEntity<ApiResponse<List<MeetingListResponseDto>>> getMeetingList(
+            @PathVariable long studyId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
         List<MeetingListResponseDto> meetingList = meetingService.getMeetingList(studyId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingList));
     }
-    //미팅 상세 조회
-    @GetMapping("/detail/{meeting_id}")
-    public ResponseEntity<ApiResponse<MeetingDetailResponseDto>> getMeetingDetail(@RequestParam("meeting_id") long meetingId,
-                                                                                  @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+    @GetMapping("/detail/{meetingId}")
+    public ResponseEntity<ApiResponse<MeetingDetailResponseDto>> getMeetingDetail(
+            @PathVariable long meetingId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
         MeetingDetailResponseDto meetingDetail = meetingService.getMeetingDetail(meetingId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(meetingDetail));
     }
 
-    //미팅 참여
-    @PostMapping("/participate/{meeting_id}")
-    public ResponseEntity<ApiResponse<Void>> participateMeeting(@RequestParam("meeting_id") long meetingId,
-                                                                @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    @PostMapping("/participate/{meetingId}")
+    public ResponseEntity<ApiResponse<Void>> participateMeeting(
+            @PathVariable long meetingId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
         meetingService.participateMeeting(meetingId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success());
     }
 
-
-    //미팅 출석
-    @PostMapping("/attendance/{meeting_id}")
-    public ResponseEntity<ApiResponse<Void>> attendanceMeeting(@RequestParam("meeting_id") long meetingId,
-                                                               @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    @PostMapping("/attendance/{meetingId}")
+    public ResponseEntity<ApiResponse<Void>> attendanceMeeting(
+            @PathVariable long meetingId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ) {
         meetingService.attendanceMeeting(meetingId, customUserDetails.getUserId());
         return ResponseEntity
                 .status(HttpStatus.OK)
