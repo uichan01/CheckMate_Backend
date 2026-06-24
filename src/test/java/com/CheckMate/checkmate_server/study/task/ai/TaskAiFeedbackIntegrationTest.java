@@ -34,8 +34,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import com.CheckMate.checkmate_server.config.EmbeddedRedisConfig;
-import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -45,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(EmbeddedRedisConfig.class)
 // @Transactional 사용 금지 — Consumer가 다른 스레드에서 커밋된 데이터를 읽어야 하므로
 class TaskAiFeedbackIntegrationTest {
 

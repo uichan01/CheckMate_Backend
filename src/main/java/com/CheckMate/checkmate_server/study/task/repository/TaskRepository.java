@@ -51,4 +51,9 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
 
     // 과제 수 반환
     long countByStudyGroupEntity_StudyId(Long studyId);
+    List<TaskEntity> findAllByStudyGroupEntity_StudyIdAndDueDateGreaterThanEqualAndDueDateLessThan(
+            Long studyId,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime
+    );
 }

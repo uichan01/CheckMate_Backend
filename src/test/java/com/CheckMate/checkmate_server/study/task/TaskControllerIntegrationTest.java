@@ -31,8 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-import com.CheckMate.checkmate_server.config.EmbeddedRedisConfig;
-import org.springframework.context.annotation.Import;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@Import(EmbeddedRedisConfig.class)
 class TaskControllerIntegrationTest {
 
     @Autowired MockMvc mockMvc;

@@ -15,5 +15,10 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, Long> {
     Optional<MeetingEntity> findFirstByStudyGroupEntity_StudyIdAndMeetingDateGreaterThanEqualOrderByMeetingDateAsc(
             Long studyId,
             LocalDateTime now
+      );
+    List<MeetingEntity> findAllByStudyGroupEntity_StudyIdAndMeetingDateGreaterThanEqualAndMeetingDateLessThan(
+            Long studyId,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime
     );
 }
