@@ -39,3 +39,4 @@ out/
 ### Secrets ###
 src/main/resources/application.yml
 src/test/resources/application-test.yml
+**/resources/*.yaml

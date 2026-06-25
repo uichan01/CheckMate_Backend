@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -65,11 +67,15 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     @Transactional
-    public void deleteUser(String email) {
-        UserEntity user = userRepository.findByEmail(email)
+    public void deleteUser(Long userId) {
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        userRepository.delete(user);
+        // 물리삭제
+//        userRepository.delete(user);
+
+        // soft delete
+        user.delete(LocalDateTime.now());
     }
 
     @Override

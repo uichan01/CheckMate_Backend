@@ -5,6 +5,7 @@ import com.CheckMate.checkmate_server.user.auth.dto.res.SignUpResponseDto;
 
 public interface UserAuthService {
     public SignUpResponseDto signUp(SignUpRequestDto request);
-    public void deleteUser(String email);
     public boolean checkEmailDuplication(String email);
+    //    public void deleteUser(String email);
+    public void deleteUser(Long userId);
 }

@@ -16,14 +16,17 @@ public class StudyGroupResponseDto {
     private Long studyId;
     private String categoryName;
     private String title;
-//    private String description;
+    private String description;
+    private long participationCnt;
 //    private GroupScope scope;
 //    private GroupJoinPolicy joinPolicy;
-    public static StudyGroupResponseDto from(StudyGroupEntity entity) {
-        return new StudyGroupResponseDto(
-                entity.getStudyId(),
-                entity.getCategoryEntity().getCategoryName(),
-                entity.getTitle()
-        );
+    public static StudyGroupResponseDto from(StudyGroupEntity entity, long participationCnt) {
+        return StudyGroupResponseDto.builder()
+                .studyId(entity.getStudyId())
+                .categoryName(entity.getCategoryEntity().getCategoryName())
+                .title(entity.getTitle())
+                .description(entity.getDescription())
+                .participationCnt(participationCnt)
+                .build();
     }
 }

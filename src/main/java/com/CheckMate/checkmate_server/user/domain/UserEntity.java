@@ -1,5 +1,6 @@
 package com.CheckMate.checkmate_server.user.domain;
 
+import com.CheckMate.checkmate_server.domain.DeleteStatus;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -35,6 +36,13 @@ public class UserEntity {
     @Column(name = "role", length = 20, nullable = false)
     private UserRole role;
 
+    @Column(name="status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DeleteStatus status;
+
+    @Column(name="delete_at")
+    private LocalDateTime deleteAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -45,6 +53,7 @@ public class UserEntity {
         this.intro = intro;
         this.nickname = nickname;
         this.role = role;
+        status = DeleteStatus.STATUS_ACTIVE;
     }
 
     public void updateProfile(String password, String nickname, String intro) {
@@ -57,5 +66,13 @@ public class UserEntity {
         if (intro != null) {
             this.intro = intro;
         }
+    }
+
+
+    // delete
+    public void delete(LocalDateTime now) {
+        this.status = DeleteStatus.STATUS_DELETE_PENDING;
+        // 3일 뒤 삭제
+        this.deleteAt = now.plusDays(3);
     }
 }
