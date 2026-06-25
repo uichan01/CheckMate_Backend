@@ -21,4 +21,6 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, Long> {
             LocalDateTime startDateTime,
             LocalDateTime endDateTime
     );
+
+    List<MeetingEntity> findByUserEntity_UserId(Long userId);
 }

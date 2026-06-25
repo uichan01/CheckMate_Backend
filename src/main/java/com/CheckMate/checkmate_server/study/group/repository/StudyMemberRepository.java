@@ -54,4 +54,10 @@ public interface StudyMemberRepository extends JpaRepository<StudyMemberEntity, 
             @Param("status") StudyMemberStatus status
     );
 
+    long countByStudyGroupEntity_StudyIdAndStatus(Long studyId, StudyMemberStatus status);
+    // 삭제
+    void deleteByStudyGroupEntity_StudyId(Long studyId);
+
+    // 삭제 시 조회
+    List<StudyMemberEntity> findByUserEntity_UserId(Long userId);
 }

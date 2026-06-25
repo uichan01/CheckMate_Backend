@@ -32,7 +32,7 @@ public class UserAuthController {
     //로그인 유저 본인 회원탈퇴
     @DeleteMapping("/me")
     public ApiResponse<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.deleteUser(userDetails.getUsername());
+        userService.deleteUser(userDetails.getUserId());
         return ApiResponse.success();
     }
 

@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface PersonalCalendarRepository extends JpaRepository<UserScheduleEntity, Long> {
     List<UserScheduleEntity> findAllByUserEntity_UserId(Long userId);
+    void deleteByUserEntity_UserId(Long userId);
 }
