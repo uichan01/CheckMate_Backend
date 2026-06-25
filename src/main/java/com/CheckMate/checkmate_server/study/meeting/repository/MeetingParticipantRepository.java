@@ -21,4 +21,5 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
             Long meetingId,
             Long userId
     );
+    void deleteByUserEntity_UserId(Long userId);
 }

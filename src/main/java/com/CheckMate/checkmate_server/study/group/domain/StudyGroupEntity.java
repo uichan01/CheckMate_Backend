@@ -1,5 +1,6 @@
 package com.CheckMate.checkmate_server.study.group.domain;
 
+import com.CheckMate.checkmate_server.domain.DeleteStatus;
 import com.CheckMate.checkmate_server.study.category.domain.StudyCategoryEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,6 +48,13 @@ public class StudyGroupEntity {
     @Column(name = "join_policy", nullable = false)
     private GroupJoinPolicy joinPolicy;
 
+    @Column(name="status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DeleteStatus status;
+
+    @Column(name="delete_at")
+    private LocalDateTime deleteAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -84,5 +92,12 @@ public class StudyGroupEntity {
             this.scope = scope;
         if (joinPolicy != null)
             this.joinPolicy = joinPolicy;
+    }
+
+    // delete
+    public void delete(LocalDateTime now) {
+        this.status = DeleteStatus.STATUS_DELETE_PENDING;
+        // 3일 뒤 삭제
+        this.deleteAt = now.plusDays(3);
     }
 }

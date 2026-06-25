@@ -58,4 +58,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long> {
             LocalDateTime startDateTime,
             LocalDateTime endDateTime
     );
+
+    List<TaskEntity> findByUserEntity_UserId(Long userId);
 }

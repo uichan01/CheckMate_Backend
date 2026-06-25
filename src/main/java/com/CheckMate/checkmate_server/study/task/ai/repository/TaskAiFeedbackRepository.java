@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface TaskAiFeedbackRepository extends JpaRepository<TaskAiFeedbackEntity, Long> {
     Optional<TaskAiFeedbackEntity> findByTaskSubmissionEntity_SubmissionId(Long submissionId);
+    void deleteAllByTaskSubmissionEntity_SubmissionId(Long submissionId);
 }

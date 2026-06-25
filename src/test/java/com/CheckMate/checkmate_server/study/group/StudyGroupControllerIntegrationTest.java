@@ -236,8 +236,7 @@ class StudyGroupControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/study/group/{studyId}/members", studyGroup.getStudyId())
                         .header("Authorization", ownerToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("outsider@test.com"))
+                        .content("{\"email\":\"outsider@test.com\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -248,8 +247,7 @@ class StudyGroupControllerIntegrationTest {
         mockMvc.perform(post("/api/v1/study/group/{studyId}/members", studyGroup.getStudyId())
                         .header("Authorization", memberToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("outsider@test.com"))
+                        .content("{\"email\":\"outsider@test.com\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }
@@ -259,8 +257,8 @@ class StudyGroupControllerIntegrationTest {
     void addStudyMember_fail_unknownEmail() throws Exception {
         mockMvc.perform(post("/api/v1/study/group/{studyId}/members", studyGroup.getStudyId())
                         .header("Authorization", ownerToken)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("unknown@test.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"unknown@test.com\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }
@@ -272,8 +270,8 @@ class StudyGroupControllerIntegrationTest {
     void removeStudyMember_success_owner() throws Exception {
         mockMvc.perform(delete("/api/v1/study/group/{studyId}/members", studyGroup.getStudyId())
                         .header("Authorization", ownerToken)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("member@test.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"member@test.com\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -283,8 +281,8 @@ class StudyGroupControllerIntegrationTest {
     void removeStudyMember_fail_member() throws Exception {
         mockMvc.perform(delete("/api/v1/study/group/{studyId}/members", studyGroup.getStudyId())
                         .header("Authorization", memberToken)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("owner@test.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"owner@test.com\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }
@@ -294,8 +292,8 @@ class StudyGroupControllerIntegrationTest {
     void removeStudyMember_fail_selfRemove() throws Exception {
         mockMvc.perform(delete("/api/v1/study/group/{studyId}/members", studyGroup.getStudyId())
                         .header("Authorization", ownerToken)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("owner@test.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"owner@test.com\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }
@@ -332,8 +330,8 @@ class StudyGroupControllerIntegrationTest {
         mockMvc.perform(patch("/api/v1/study/group/{studyId}/member_role/{role}",
                         studyGroup.getStudyId(), StudyMemberRole.ROLE_MANAGER)
                         .header("Authorization", ownerToken)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("member@test.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"member@test.com\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
@@ -344,8 +342,8 @@ class StudyGroupControllerIntegrationTest {
         mockMvc.perform(patch("/api/v1/study/group/{studyId}/member_role/{role}",
                         studyGroup.getStudyId(), StudyMemberRole.ROLE_MANAGER)
                         .header("Authorization", memberToken)
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("owner@test.com"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"owner@test.com\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false));
     }

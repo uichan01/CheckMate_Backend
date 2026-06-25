@@ -12,5 +12,7 @@ import java.time.LocalDateTime;
 public class StudyGroupRequestResponseDto {
     private Long studyMemberId;
     private Long userId;
-    LocalDateTime requestDate;
+    private String email;
+    private String nickname;
+    private LocalDateTime requestDate;
 }

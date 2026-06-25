@@ -8,4 +8,6 @@ import java.util.List;
 public interface TaskSubmissionRepository extends JpaRepository<TaskSubmissionEntity, Long> {
     void deleteAllByTaskEntity_TaskId(Long taskId);
     List<TaskSubmissionEntity> findAllByTaskEntity_TaskId(Long studyId);
+
+    List<TaskSubmissionEntity> findAllByUserEntity_UserId(Long userId);
 }

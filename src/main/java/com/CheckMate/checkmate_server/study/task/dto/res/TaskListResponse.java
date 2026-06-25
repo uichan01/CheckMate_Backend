@@ -12,11 +12,13 @@ public class TaskListResponse {
 
     private Long taskId;
     private String title;
+    private Long writerId;
     private LocalDateTime dueDate;
 
     public static TaskListResponse from(TaskEntity taskEntity) {
         return TaskListResponse.builder()
                 .taskId(taskEntity.getTaskId())
+                .writerId(taskEntity.getUserEntity().getUserId())
                 .title(taskEntity.getTitle())
                 .dueDate(taskEntity.getDueDate())
                 .build();

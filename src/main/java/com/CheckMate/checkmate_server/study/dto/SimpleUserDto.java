@@ -1,5 +1,6 @@
 package com.CheckMate.checkmate_server.study.dto;
 
+import com.CheckMate.checkmate_server.study.group.domain.StudyMemberRole;
 import com.CheckMate.checkmate_server.user.domain.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
