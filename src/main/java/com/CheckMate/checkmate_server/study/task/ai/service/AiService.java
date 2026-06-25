@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
@@ -42,7 +43,13 @@ public class AiService {
 
     public AiFeedbackResult generateFeedback(
             String taskTitle, String taskContent,
-            String submissionTitle, String submissionContent) {
+            String submissionTitle, String submissionContent,
+            List<String> attachmentUrls,
+            String attachmentText) {
+
+        String attachmentUrlText = attachmentUrls == null || attachmentUrls.isEmpty()
+                ? ""
+                : String.join("\n", attachmentUrls);
 
         String userMessage = """
                 [과제 제목] %s
@@ -55,6 +62,13 @@ public class AiService {
                 taskContent != null ? taskContent : "",
                 submissionTitle,
                 submissionContent != null ? submissionContent : "");
+
+        if (!attachmentUrlText.isBlank()) {
+            userMessage += "\n[Submission Attachment File URLs]\n" + attachmentUrlText;
+        }
+        if (StringUtils.hasText(attachmentText)) {
+            userMessage += "\n\n[Submission Attachment Text]\n" + attachmentText;
+        }
 
         Map<String, Object> requestBody = Map.of(
                 "model", model,

@@ -74,4 +74,14 @@ public class TaskAiFeedbackEntity {
         this.errorMessage = errorMessage;
         this.completedAt = LocalDateTime.now();
     }
+
+    public void cleanUp(){
+        this.status = AiFeedbackStatus.PENDING;
+        this.strength = null;
+        this.weakness = null;
+        this.suggestion = null;
+        this.errorMessage = null;
+        this.startedAt = null;
+        this.completedAt = null;
+    }
 }
