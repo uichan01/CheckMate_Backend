@@ -7,6 +7,7 @@ import com.CheckMate.checkmate_server.study.task.dto.res.TaskDetailResponse;
 import com.CheckMate.checkmate_server.study.task.dto.res.TaskListResponse;
 import com.CheckMate.checkmate_server.study.task.dto.res.TaskSubmissionDetailResponse;
 import com.CheckMate.checkmate_server.study.task.dto.res.TaskSubmissionListResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,7 +23,9 @@ public interface TaskService {
     // 과제 상세 조회
     TaskDetailResponse getTaskDetail(Long userId, Long taskId);
     // 과제 제출
-    void submitTask(Long userId, Long taskId, TaskSubmitRequest request);
+    void submitTask(Long userId, Long taskId, TaskSubmitRequest request, List<MultipartFile> files);
+    // 과제 수정
+    void modifySubmitTask(Long userId, Long submitId, TaskSubmitRequest request, List<MultipartFile> files);
     // 특정 과제 제출 목록 조회
     List<TaskSubmissionListResponse> getSubmissionList(Long userId, Long taskId);
     // 과제 제출 상세 조회

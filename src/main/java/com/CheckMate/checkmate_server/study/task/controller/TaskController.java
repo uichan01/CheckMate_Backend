@@ -12,8 +12,10 @@ import com.CheckMate.checkmate_server.study.task.dto.res.TaskSubmissionListRespo
 import com.CheckMate.checkmate_server.study.task.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -75,13 +77,26 @@ public class TaskController {
     }
 
     // 과제 제출
-    @PostMapping("/{taskId}/submit")
+    @PostMapping(value = "/{taskId}/submit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Void> submitTask(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long taskId,
-            @Valid @RequestBody TaskSubmitRequest request
+            @Valid @RequestPart("request") TaskSubmitRequest request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        taskService.submitTask(userDetails.getUserId(), taskId, request);
+        taskService.submitTask(userDetails.getUserId(), taskId, request, files);
+        return ApiResponse.success();
+    }
+
+    //과제 수정
+    @PutMapping(value = "/submission/{submitId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Void> modifySubmitTask(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long submitId,
+            @Valid @RequestPart("request") TaskSubmitRequest request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
+        taskService.modifySubmitTask(userDetails.getUserId(), submitId, request, files);
         return ApiResponse.success();
     }
 
